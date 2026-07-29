@@ -12,6 +12,10 @@ type ListingsResponse = {
 type ListingsParams = {
   q?: string;
   category?: string;
+  minPrice?: string;
+  maxPrice?: string;
+  facilities?: string[];
+  sortBy?: string;
 };
 
 export const getListings = async (
@@ -19,6 +23,9 @@ export const getListings = async (
 ): Promise<ListingsResponse> => {
   const response = await api.get<ListingsResponse>("/listings", {
     params,
+    paramsSerializer: {
+      indexes: null,
+    },
   });
 
   return response.data;

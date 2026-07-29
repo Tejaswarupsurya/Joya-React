@@ -25,6 +25,14 @@
   opacity: 1;
 }
 
+.filterBtn{
+  border: 1px solid #ced4da;
+  border-radius: 25px;
+  background-color: #fff;
+  transition: transform 0.3s ease;
+  height: 45px;
+  width: 130px;
+}
 .taxSwitch {
   border: 1px solid #ced4da;
   border-radius: 25px;
@@ -32,6 +40,15 @@
   transition: transform 0.3s ease;
   height: 45px;
   width: 150px;
+}
+
+.taxSwitch:hover,
+.filterBtn:hover {
+  transform: scale(1.05);
+  border-color: #adb5bd;
+  opacity: 1;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+  cursor: pointer;
 }
 
 .underline-slide {

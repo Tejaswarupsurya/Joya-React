@@ -4,6 +4,7 @@ import { useOutletContext, useSearchParams } from "react-router-dom";
 
 import CategoryBar from "../components/listings/CategoryBar";
 import ListingGrid from "../components/listings/ListingGrid";
+import ListingSkeleton from "../components/listings/ListingSkeleton";
 
 import { getListings } from "../api/listings";
 import type { CurrentUser } from "../types/user";
@@ -21,13 +22,33 @@ export default function ListingsPage() {
 
   const q = searchParams.get("q") ?? "";
   const selectedCategory = searchParams.get("category") ?? "all";
+  const minPrice = searchParams.get("minPrice") ?? "";
+  const maxPrice = searchParams.get("maxPrice") ?? "";
+  const selectedFacilities = searchParams.getAll("facilities");
+  const sortBy = searchParams.get("sortBy") ?? "";
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["listings", { q, category: selectedCategory }],
+    queryKey: [
+      "listings",
+      {
+        q,
+        category: selectedCategory,
+        minPrice,
+        maxPrice,
+        facilities: selectedFacilities,
+        sortBy,
+      },
+    ],
+
     queryFn: () =>
       getListings({
         q: q || undefined,
         category: selectedCategory === "all" ? undefined : selectedCategory,
+        minPrice: minPrice || undefined,
+        maxPrice: maxPrice || undefined,
+        facilities:
+          selectedFacilities.length > 0 ? selectedFacilities : undefined,
+        sortBy: sortBy || undefined,
       }),
   });
 
@@ -45,10 +66,6 @@ export default function ListingsPage() {
     });
   };
 
-  if (isLoading) {
-    return <p>Loading...</p>;
-  }
-
   if (isError) {
     return <p>Failed to load listings.</p>;
   }
@@ -64,12 +81,16 @@ export default function ListingsPage() {
         onTaxChange={setIncludeTax}
       />
 
-      <ListingGrid
-        listings={listings}
-        currentUser={currentUser}
-        userWishlist={userWishlist}
-        includeTax={includeTax}
-      />
+      {isLoading ? (
+        <ListingSkeleton />
+      ) : (
+        <ListingGrid
+          listings={listings}
+          currentUser={currentUser}
+          userWishlist={userWishlist}
+          includeTax={includeTax}
+        />
+      )}
     </>
   );
 }

@@ -62,8 +62,7 @@
 
 .login:hover,
 .signup:hover,
-.logout:hover,
-.taxSwitch:hover {
+.logout:hover {
   transform: scale(1.05);
   border-color: #adb5bd;
   opacity: 1;

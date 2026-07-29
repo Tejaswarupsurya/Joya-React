@@ -1,0 +1,15 @@
+export const facilities = [
+  { name: "Free Wi-Fi", icon: "wifi" },
+  { name: "Air Conditioning", icon: "snow" },
+  { name: "Hot Water", icon: "droplet" },
+  { name: "TV", icon: "tv" },
+  { name: "Security Cameras", icon: "camera-video" },
+  { name: "Parking", icon: "car-front" },
+  { name: "Breakfast Included", icon: "cup-hot" },
+  { name: "Restaurant Onsite", icon: "shop" },
+  { name: "Room Service", icon: "bell" },
+  { name: "Swimming Pool", icon: "water" },
+  { name: "Pet Allowed", icon: "emoji-smile" },
+  { name: "Wheelchair Accessible", icon: "person-wheelchair" },
+  { name: "Fire Safety", icon: "fire" },
+];

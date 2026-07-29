@@ -1,4 +1,5 @@
 import { categories } from "../../constants/categories";
+import FilterModal from "./FilterModal";
 import "./CategoryBar.css";
 
 type CategoryBarProps = {
@@ -32,7 +33,9 @@ export default function CategoryBar({
         ))}
       </div>
 
-      <div className="form-check form-switch form-check-reverse d-none d-lg-flex align-items-center justify-content-center ms-2 gap-2 taxSwitch">
+      <FilterModal />
+
+      <div className="form-check form-switch form-check-reverse d-none d-lg-flex align-items-center justify-content-center ms-3 gap-2 taxSwitch">
         <label className="form-check-label" htmlFor="taxToggle">
           Include Tax
         </label>
