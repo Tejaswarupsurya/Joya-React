@@ -1,4 +1,4 @@
-import { api } from "./axios"
+import { api } from "./axios";
 import type { Listing } from "../types/listing";
 
 type ListingsResponse = {
@@ -9,8 +9,17 @@ type ListingsResponse = {
   };
 };
 
-export const getListings = async (): Promise<ListingsResponse> => {
-  const response = await api.get<ListingsResponse>("/listings");
+type ListingsParams = {
+  q?: string;
+  category?: string;
+};
+
+export const getListings = async (
+  params: ListingsParams,
+): Promise<ListingsResponse> => {
+  const response = await api.get<ListingsResponse>("/listings", {
+    params,
+  });
 
   return response.data;
 };

@@ -62,7 +62,6 @@ const bookingRouter = require("./routes/booking");
 const hostRouter = require("./routes/host");
 const adminRouter = require("./routes/admin");
 const wishlistRouter = require("./routes/wishlist");
-const searchRouter = require("./routes/search");
 const paymentRouter = require("./routes/payment");
 
 // mongoAtlas & mongodb Section
@@ -154,7 +153,6 @@ app.use("/listings/:id/bookings", bookingRouter);
 app.use("/api/wishlist", wishlistRouter);
 app.use("/info/:page", infoRouter);
 app.use("/payments", paymentRouter);
-app.use("/", searchRouter);
 app.use("/", adminRouter);
 app.use("/", hostRouter);
 app.use("/", userRouter);

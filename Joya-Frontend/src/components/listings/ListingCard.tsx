@@ -16,6 +16,7 @@ type ListingCardProps = {
   currentUser?: CurrentUser | null;
   userWishlist: string[];
   index: number;
+  includeTax: boolean;
 };
 
 export default function ListingCard({
@@ -23,9 +24,14 @@ export default function ListingCard({
   currentUser,
   userWishlist,
   index,
+  includeTax,
 }: ListingCardProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+
+  const displayedPrice = includeTax
+    ? Math.round(listing.price * 1.18)
+    : listing.price;
 
   // Derived from server state — no separate useState needed
   const isWishlisted = userWishlist.includes(listing._id);
@@ -163,7 +169,8 @@ export default function ListingCard({
             className="card-text listing-price mt-1 mb-0"
             data-original-price={listing.price}
           >
-            ₹{listing.price.toLocaleString("en-IN")}/night.
+            ₹{displayedPrice.toLocaleString("en-IN")}/night
+            {includeTax ? " (incl. taxes)" : ""}
           </p>
 
           <div className="card-text mb-0">

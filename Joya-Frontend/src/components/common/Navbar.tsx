@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useSearchParams,
+} from "react-router-dom";
 import type { CurrentUser } from "../../types/user";
 import logo from "../../assets/logo.png";
 import "./Navbar.css";
@@ -18,6 +22,10 @@ const hiddenSearchRoutes = [
 
 export default function Navbar({ currentUser }: NavbarProps) {
   const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const [searchInput, setSearchInput] = useState(searchParams.get("q") ?? "");
+
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const hideTimeoutRef = useRef<number | null>(null);
 
@@ -28,6 +36,35 @@ export default function Navbar({ currentUser }: NavbarProps) {
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (location.pathname !== "/listings") {
+      return;
+    }
+
+    const trimmedQuery = searchInput.trim();
+
+    // Same rule as old Joya: don't search for 1 character
+    if (trimmedQuery.length === 1) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setSearchParams((params) => {
+        if (trimmedQuery) {
+          params.set("q", trimmedQuery);
+        } else {
+          params.delete("q");
+        }
+
+        return params;
+      });
+    }, 300);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [searchInput, location.pathname, setSearchParams]);
 
   const shouldShowSearch = !hiddenSearchRoutes.includes(location.pathname);
 
@@ -120,13 +157,19 @@ export default function Navbar({ currentUser }: NavbarProps) {
 
           {shouldShowSearch && (
             <div className="navbar-nav ms-auto">
-              <form className="d-flex position-relative" role="search">
+              <form
+                className="d-flex position-relative"
+                role="search"
+                onSubmit={(event) => event.preventDefault()}
+              >
                 <input
                   className="form-control me-2 search-input"
                   type="search"
                   id="search"
                   placeholder="Search destinations !"
                   autoComplete="off"
+                  value={searchInput}
+                  onChange={(event) => setSearchInput(event.target.value)}
                 />
                 <button className="btn search-btn" type="submit">
                   <i className="bi bi-search me-2"></i>

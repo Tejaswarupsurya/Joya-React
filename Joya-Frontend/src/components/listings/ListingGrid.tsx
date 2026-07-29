@@ -7,12 +7,14 @@ type ListingGridProps = {
   listings: Listing[];
   currentUser?: CurrentUser | null;
   userWishlist: string[];
+  includeTax: boolean;
 };
 
 export default function ListingGrid({
   listings,
   currentUser,
   userWishlist,
+  includeTax,
 }: ListingGridProps) {
   if (listings.length === 0) {
     return <NoResults />;
@@ -29,6 +31,7 @@ export default function ListingGrid({
           currentUser={currentUser}
           userWishlist={userWishlist}
           index={index}
+          includeTax={includeTax}
         />
       ))}
     </div>

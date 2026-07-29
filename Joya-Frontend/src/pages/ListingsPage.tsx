@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useOutletContext } from "react-router-dom";
+import { useOutletContext, useSearchParams } from "react-router-dom";
 
 import CategoryBar from "../components/listings/CategoryBar";
 import ListingGrid from "../components/listings/ListingGrid";
@@ -13,12 +14,36 @@ type MainLayoutContext = {
 };
 
 export default function ListingsPage() {
+  const [includeTax, setIncludeTax] = useState(false);
   const { currentUser, userWishlist } = useOutletContext<MainLayoutContext>();
 
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const q = searchParams.get("q") ?? "";
+  const selectedCategory = searchParams.get("category") ?? "all";
+
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["listings"],
-    queryFn: getListings,
+    queryKey: ["listings", { q, category: selectedCategory }],
+    queryFn: () =>
+      getListings({
+        q: q || undefined,
+        category: selectedCategory === "all" ? undefined : selectedCategory,
+      }),
   });
+
+  const handleCategoryChange = (category: string) => {
+    setSearchParams((params) => {
+      const currentCategory = params.get("category");
+
+      if (currentCategory === category) {
+        params.delete("category");
+      } else {
+        params.set("category", category);
+      }
+
+      return params;
+    });
+  };
 
   if (isLoading) {
     return <p>Loading...</p>;
@@ -32,12 +57,18 @@ export default function ListingsPage() {
 
   return (
     <>
-      <CategoryBar />
+      <CategoryBar
+        selectedCategory={selectedCategory}
+        onCategoryChange={handleCategoryChange}
+        includeTax={includeTax}
+        onTaxChange={setIncludeTax}
+      />
 
       <ListingGrid
         listings={listings}
         currentUser={currentUser}
         userWishlist={userWishlist}
+        includeTax={includeTax}
       />
     </>
   );
