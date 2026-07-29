@@ -1,0 +1,181 @@
+<nav
+  className="navbar navbar-expand-md bg-body-light border-bottom custom-sticky sticky-top"
+>
+  <div className="container-fluid">
+    <a className="navbar-brand mt-0" href="/listings">
+      <img
+        src="/assets/logo.png"
+        alt="Joya"
+        className="img-fluid"
+        style="max-height: 70px"
+      />
+    </a>
+    <button
+      className="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarNavAltMarkup"
+    >
+      <span className="navbar-toggler-icon"></span>
+    </button>
+    <div
+      className="collapse navbar-collapse"
+      id="navbarNavAltMarkup"
+      style="background-color: white"
+    >
+      <div className="navbar-nav">
+        <a className="nav-link underline-slide" href="/listings">Explore</a>
+      </div>
+      <% if (typeof path !== 'undefined' && !["/login", "/signup",
+      "/listings/new","/forgot","/update-password"].includes(path)) { %>
+      <div className="navbar-nav ms-auto">
+        <form className="d-flex position-relative" role="search">
+          <input
+            className="form-control me-2 search-input"
+            type="search"
+            id="search"
+            placeholder="Search destinations !"
+            autocomplete="off"
+          />
+          <button className="btn search-btn" type="submit">
+            <i className="bi bi-search me-2"></i>
+            <div>Search</div>
+          </button>
+        </form>
+      </div>
+      <% } %>
+      <div className="navbar-nav ms-auto">
+        <% if (!currUser) { %>
+        <!-- Guests -->
+        <a className="nav-link signup" href="/signup"><b>Sign Up</b></a>
+        <a className="nav-link login" href="/login"><b>Log In</b></a>
+        <% } else { %>
+        <!-- Host Status Based Navigation -->
+        <% if (currUser.role === 'user') { %>
+        <!-- Regular users - encourage to become host -->
+        <a className="nav-link underline-slide" href="/apply">
+          <i className="bi bi-person me-1"></i>Become a Host?
+        </a>
+        <% } else if (currUser.role === 'host') { %>
+        <!-- Host users - show based on approval status -->
+        <% if (currUser.host.status === 'approved') { %>
+        <a className="nav-link underline-slide" href="/listings/new">
+          Add your Home
+        </a>
+        <% } else if (currUser.host.status === 'pending') { %>
+        <span
+          className="nav-link"
+          style="color: #fbbf24; cursor: default; font-weight: 500"
+        >
+          <i className="bi bi-exclamation-triangle me-1" style="color: #fbbf24"></i
+          >Awaiting Admin Approval
+        </span>
+        <% } else if (currUser.host.status === 'rejected') { %>
+        <a
+          className="nav-link underline-slide"
+          href="/apply"
+          style="color: #f472b6"
+        >
+          <i className="bi bi-x-circle me-1" style="color: #f472b6"></i>Reapply as
+          Host
+        </a>
+        <% } %> <% } %>
+
+        <!-- Dashboard for all roles -->
+        <a
+          className="nav-link underline-slide me-3"
+          href="/dashboard"
+          style="
+            color: #374151;
+            font-weight: 600;
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+          "
+        >
+          <i className="bi bi-speedometer2 me-1"></i>Dashboard
+        </a>
+
+        <!-- User avatar dropdown -->
+        <div className="d-flex align-items-center gap-2 me-3">
+          <div className="dropdown">
+            <div
+              className="user-avatar-wrapper d-flex align-items-center justify-content-center"
+              id="userDropdown"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+              title="<%= currUser.username %>"
+            >
+              <% if (currUser.role === 'admin') { %>
+              <img
+                src="https://res.cloudinary.com/dcvaeebuf/image/upload/v1759743353/host1.jpg"
+                alt="<%= currUser.username %>"
+                className="user-avatar-img"
+              />
+              <% } else if (currUser.role === 'host' && currUser.host &&
+              currUser.host.avatar && currUser.host.avatar.url) { %>
+              <img
+                src="<%= currUser.host.avatar.url %>"
+                alt="<%= currUser.username %>"
+                className="user-avatar-img"
+              />
+              <% } else { %>
+              <div
+                className="user-avatar-initials d-flex align-items-center justify-content-center text-white fw-bold"
+              >
+                <%= currUser.username.charAt(0).toUpperCase() %>
+              </div>
+              <% } %>
+            </div>
+            <ul
+              className="dropdown-menu dropdown-menu-end"
+              aria-labelledby="userDropdown"
+            >
+              <li>
+                <% // Determine dashboard URL based on user role let
+                dashboardUrl = '/dashboard'; if (currUser.role === 'admin') {
+                dashboardUrl = '/admin/dashboard'; } else if (currUser.role ===
+                'host') { dashboardUrl = '/hosts/dashboard'; } %>
+                <a className="dropdown-item" href="<%= dashboardUrl %>">
+                  <i className="bi bi-person-circle me-2"></i><%= currUser.username
+                  %>
+                </a>
+              </li>
+              <li><hr className="dropdown-divider" /></li>
+
+              <% if (currUser.role === 'user') { %>
+              <!-- Wishlist option only for regular users -->
+              <li>
+                <a className="dropdown-item" href="/dashboard#wishlist">
+                  <i className="bi bi-heart me-2"></i>My Wishlist
+                </a>
+              </li>
+              <li><hr className="dropdown-divider" /></li>
+              <% } %>
+
+              <li>
+                <a className="dropdown-item" href="/update-password">
+                  <i className="bi bi-shield-lock me-2"></i>Change Password
+                </a>
+              </li>
+
+              <li>
+                <a className="dropdown-item" href="/change-email">
+                  <i className="bi bi-envelope-at me-2"></i>Update Email
+                </a>
+              </li>
+
+              <li><hr className="dropdown-divider" /></li>
+              <li>
+                <a className="dropdown-item text-danger" href="/logout">
+                  <i className="fa-solid fa-right-from-bracket me-2"></i>Log out
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</nav>

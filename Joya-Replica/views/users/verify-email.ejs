@@ -1,0 +1,126 @@
+<% layout("./layouts/boilerplate")-%>
+<div class="container row mt-3">
+  <div class="col-6 offset-3">
+    <h3>Verify Your Email</h3>
+    <p class="text-muted">
+      We've sent a 6-digit code to <strong><%= email %></strong>
+    </p>
+
+    <form
+      action="/verify-email"
+      method="POST"
+      novalidate
+      class="needs-validation"
+    >
+      <div class="mb-3">
+        <label for="otp" class="form-label">Enter Verification Code</label>
+        <input
+          type="text"
+          class="form-control"
+          id="otp"
+          name="otp"
+          placeholder="Enter 6-digit code"
+          maxlength="6"
+          pattern="[0-9]{6}"
+          required
+          autofocus
+          autocomplete="off"
+        />
+        <div class="form-text">
+          <i class="bi bi-clock me-1"></i>Code expires in
+          <strong><span id="timer"><%= remainingTime %></span>s</strong>
+        </div>
+        <div class="invalid-feedback">Please enter the 6-digit code</div>
+      </div>
+
+      <div class="mb-3">
+        <small class="text-muted">
+          Didn't receive the code? <% if (canResend) { %>
+          <form action="/resend-otp" method="POST" class="d-inline">
+            <button type="submit" class="btn btn-link btn-sm p-0">
+              <i class="bi bi-arrow-clockwise me-1"></i>Resend Code
+            </button>
+          </form>
+          <% } else { %>
+          <span class="text-muted">Wait 60s to resend</span>
+          <% } %>
+        </small>
+      </div>
+
+      <div
+        class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2"
+      >
+        <button class="btn btn-color">
+          <i class="bi bi-check-circle me-1"></i>Verify Email
+        </button>
+        <a href="/signup" class="text-muted go-back"
+          ><i class="bi bi-caret-left-fill"></i>Go Back</a
+        >
+      </div>
+
+      <!-- Help Links -->
+      <div class="text-center mt-3">
+        <small class="text-muted">
+          <i class="bi bi-info-circle me-1"></i>Check your spam folder if you
+          don't see the email.
+        </small>
+      </div>
+
+      <br /><br />
+    </form>
+  </div>
+</div>
+
+<script>
+  // Countdown timer
+  let timeLeft = <%= remainingTime %>;
+  const timerElement = document.getElementById("timer");
+
+  const countdown = setInterval(() => {
+    timeLeft--;
+    timerElement.textContent = timeLeft;
+
+    if (timeLeft <= 0) {
+      clearInterval(countdown);
+      timerElement.parentElement.innerHTML =
+        '<span class="text-danger"><i class="bi bi-exclamation-triangle me-1"></i>Code expired! Please sign up again.</span>';
+      document.querySelector('button[type="submit"]').disabled = true;
+    }
+  }, 1000);
+
+  // Auto-format OTP input (numbers only)
+  const otpInput = document.getElementById("otp");
+  otpInput.addEventListener("input", function (e) {
+    this.value = this.value.replace(/[^0-9]/g, "");
+  });
+
+  // Auto-submit when 6 digits entered
+  otpInput.addEventListener("input", function (e) {
+    if (this.value.length === 6) {
+      // Optional: auto-submit
+      // this.form.submit();
+    }
+  });
+</script>
+
+<style>
+  .card {
+    border-radius: 15px;
+  }
+
+  #otp:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+  }
+
+  .btn-color {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    color: white;
+  }
+
+  .btn-color:hover {
+    background: linear-gradient(135deg, #5568d3 0%, #6a4293 100%);
+    color: white;
+  }
+</style>

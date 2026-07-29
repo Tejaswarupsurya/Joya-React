@@ -1,0 +1,26 @@
+.underline-slide {
+  position: relative;
+  background: none;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+  padding-bottom: 2px; /* spacing for underline */
+}
+
+.underline-slide::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%) scaleX(0);
+  transform-origin: center;
+  height: 2px;
+  width: 100%;
+  background-color: #fc385c;
+  transition: transform 0.5s ease;
+}
+
+.underline-slide:hover::after,
+.underline-slide.active::after {
+  transform: translateX(-50%) scaleX(1);
+}

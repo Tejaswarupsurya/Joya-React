@@ -1,0 +1,21 @@
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  margin: 0;
+  font-family: "Plus Jakarta Sans", sans-serif !important;
+}
+
+.container {
+  flex: 1; /* Ensures the main content takes up available space */
+}
+
+.btn-color {
+  background-color: #fc385c !important;
+  color: white !important;
+  font-weight: 500 !important;
+  transition: transform 0.3sec ease;
+}
+.btn-color:hover {
+  transform: scale(1.05);
+}

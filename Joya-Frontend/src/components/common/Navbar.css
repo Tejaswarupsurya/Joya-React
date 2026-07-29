@@ -1,0 +1,205 @@
+.navbar {
+  height: 4.5rem;
+  background-color: white;
+}
+
+.navbar-logo {
+  max-height: 70px;
+}
+
+.joya-navbar-collapse {
+  background-color: white;
+}
+
+.nav-link {
+  color: black !important;
+}
+
+.search-btn {
+  background-color: #fc385c;
+  color: white;
+  border-radius: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+  padding: 0 1rem;
+}
+
+.search-btn:hover {
+  background-color: #fc385c;
+  color: white;
+  transform: scale(1.05);
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.search-input {
+  border-radius: 25px;
+  padding: 0.5rem 12rem 0.5rem 2rem;
+  font-size: 1rem;
+}
+
+@media (max-width: 767.98px) {
+  .custom-sticky {
+    position: static !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .custom-sticky {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    z-index: 1030;
+  }
+}
+
+.signup,
+.login,
+.logout {
+  opacity: 0.8;
+  border-radius: 25px;
+  transition: transform 0.3s ease;
+}
+
+.login:hover,
+.signup:hover,
+.logout:hover,
+.taxSwitch:hover {
+  transform: scale(1.05);
+  border-color: #adb5bd;
+  opacity: 1;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+  cursor: pointer;
+}
+
+
+/* Navbar Dropdown Enhancements */
+.dropdown-menu {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  padding: 0.5rem 0;
+  min-width: 200px;
+  animation: dropdownFadeIn 0.2s ease-out;
+}
+/* Position dropdown properly relative to user avatar */
+.dropdown-menu-end {
+  --bs-position: absolute;
+  right: 0;
+  left: auto;
+  transform: none;
+}
+/* Adjust dropdown position to align with user avatar */
+.navbar .dropdown-menu-end {
+  right: 0 !important;
+  left: auto !important;
+  transform: translateX(-20px) !important;
+  margin-top: 5px;
+}
+/* Force dropdown to stay within viewport on small screens */
+@media (max-width: 576px) {
+  .navbar .dropdown-menu-end {
+    right: -10px !important;
+    left: auto !important;
+    min-width: 180px;
+    transform: translateX(-10px) !important;
+  }
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown-item {
+  padding: 0.75rem 1.25rem;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  border-radius: 0;
+}
+
+.dropdown-item:hover {
+  transform: translateX(5px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown-item:hover i {
+  transform: scale(1.1);
+}
+
+.dropdown-item.text-danger:hover {
+  transform: translateX(5px);
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2);
+}
+
+.dropdown-item.text-danger:hover i {
+  transform: scale(1.1);
+}
+
+.dropdown-divider {
+  margin: 0.25rem 1rem;
+  opacity: 0.2;
+}
+
+.user-avatar-wrapper {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.user-avatar-wrapper:hover {
+  transform: scale(1.05);
+  border-color: #adb5bd;
+  opacity: 1;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+  cursor: pointer;
+}
+
+.user-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.user-avatar-initials {
+  width: 34px;
+  height: 34px;
+  font-size: 1rem;
+  background-color: #f6778e;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.dashboard-pill {
+  color: #374151 !important;
+  font-weight: 600;
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+}
+
+.navbar-status-pending {
+  color: #fbbf24 !important;
+  cursor: default;
+  font-weight: 500;
+}
+
+.navbar-status-rejected {
+  color: #f472b6 !important;
+}
+
+.joya-navbar-actions {
+  gap: 0.25rem;
+  align-items: center;
+}
