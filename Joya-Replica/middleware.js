@@ -39,12 +39,26 @@ module.exports.validateSignup = (req, res, next) => {
   const { error } = signupSchema.validate(req.body, {
     abortEarly: false,
   });
-  if (error) {
-    const errmsg = error.details.map((el) => el.message).join(", ");
-    req.flash("error", errmsg);
-    return res.redirect("/signup");
+
+  if (!error) {
+    return next();
   }
-  next();
+
+  const errors = {};
+
+  error.details.forEach((detail) => {
+    const field = detail.path[0];
+
+    if (field && !errors[field]) {
+      errors[field] = detail.message;
+    }
+  });
+
+  return res.status(400).json({
+    success: false,
+    message: "Please correct the highlighted fields.",
+    errors,
+  });
 };
 
 module.exports.validateUpdatePassword = (req, res, next) => {
