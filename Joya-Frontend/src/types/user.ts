@@ -15,3 +15,9 @@ export type AuthResponse = {
   currentUser: CurrentUser | null;
   userWishlist: string[];
 };
+
+export type LoginResponse = {
+  success: boolean;
+  message: string;
+  user: CurrentUser;
+};

@@ -19,3 +19,15 @@ body {
 .btn-color:hover {
   transform: scale(1.05);
 }
+
+.eye-toggle{
+  position: absolute;
+  right: 2.5rem;
+  top: 2.1rem;
+
+  cursor: pointer;
+  font-size: 1.4rem;
+  color: black;
+  opacity: 0.6;
+  z-index: 5;
+}
