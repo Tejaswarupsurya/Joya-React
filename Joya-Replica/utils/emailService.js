@@ -49,10 +49,8 @@ async function sendOTPEmail(to, otp, username = "User") {
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log(`📧 OTP email sent to ${to} (Message ID: ${info.messageId})`);
     return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error("❌ Error sending OTP email:", error.message);
     throw new Error("Failed to send verification email");
   }
 }
@@ -74,10 +72,8 @@ async function sendPasswordResetEmail(to, otp, username) {
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log(`📧 Password reset email sent to ${to} (Message ID: ${info.messageId})`);
     return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error("❌ Error sending password reset email:", error.message);
     throw new Error("Failed to send password reset email");
   }
 }
@@ -99,10 +95,8 @@ async function sendPasswordUpdatedEmail(to, username) {
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log(`📧 Password updated email sent to ${to} (Message ID: ${info.messageId})`);
     return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error("❌ Error sending password updated email:", error.message);
     return { success: false, error: error.message };
   }
 }
@@ -124,10 +118,8 @@ async function sendBookingConfirmedEmail(to, username, booking, listing) {
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log(`📧 Booking confirmed email sent to ${to} (Message ID: ${info.messageId})`);
     return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error("❌ Error sending booking confirmed email:", error.message);
     return { success: false, error: error.message };
   }
 }
@@ -149,10 +141,8 @@ async function sendBookingCancelledEmail(to, username, booking, listing) {
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log(`📧 Booking cancelled email sent to ${to} (Message ID: ${info.messageId})`);
     return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error("❌ Error sending booking cancelled email:", error.message);
     return { success: false, error: error.message };
   }
 }
@@ -174,11 +164,9 @@ async function sendWelcomeEmail(to, username) {
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log(`📧 Welcome email sent to ${to} (Message ID: ${info.messageId})`);
     return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error("❌ Error sending welcome email:", error.message);
-    return { success: false, error: error.message };
+    throw new Error("Failed to send welcome email");
   }
 }
 

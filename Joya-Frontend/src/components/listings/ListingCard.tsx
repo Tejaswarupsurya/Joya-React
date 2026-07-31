@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 import "./ListingCard.css";
 
@@ -46,7 +47,7 @@ export default function ListingCard({
 
     onSuccess: (data) => {
       if (!data.success || !data.action) {
-        alert(data.message || "Failed to update wishlist");
+        toast.error(data.message || "Failed to update wishlist");
         return;
       }
 
@@ -70,16 +71,19 @@ export default function ListingCard({
 
       if (data.action === "added") {
         setIsHeartBeating(true);
+        toast.success("Added to wishlist");
 
         window.setTimeout(() => {
           setIsHeartBeating(false);
         }, 600);
+      } else {
+        toast.success("Removed from wishlist");
       }
     },
 
     onError: (error) => {
       console.error("Error:", error);
-      alert("Failed to update wishlist");
+      toast.error("Failed to update wishlist");
     },
   });
 

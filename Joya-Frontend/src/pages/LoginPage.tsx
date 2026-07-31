@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient} from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import { toast } from "sonner";
 
 import { login } from "../api/auth";
 import type { AuthResponse } from "../types/user";
@@ -29,11 +30,15 @@ export default function LoginPage() {
         userWishlist: [],
       });
       queryClient.invalidateQueries({ queryKey: ["auth"] });
+      toast.success(data.message || "Welcome back to Joya!");
       navigate("/listings");
     },
 
-    onError: () => {
+    onError: (error) => {
       queryClient.clear();
+      if (error instanceof AxiosError && !error.response) {
+        toast.error("Network error. Please check your connection and try again.");
+      }
     }
   });
 

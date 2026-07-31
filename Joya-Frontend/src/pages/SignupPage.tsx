@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import { toast } from "sonner";
 
 import {
   type SignupCredentials,
@@ -26,8 +27,15 @@ export default function SignupPage() {
   const signupMutation = useMutation({
     mutationFn: signup,
 
-    onSuccess: () => {
+    onSuccess: (data) => {
+      toast.success(data.message || "Verification code sent to your email!");
       navigate("/verify-email");
+    },
+
+    onError: (error) => {
+      if (error instanceof AxiosError && !error.response) {
+        toast.error("Network error. Please check your connection and try again.");
+      }
     },
   });
 

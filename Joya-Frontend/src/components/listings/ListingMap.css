@@ -1,0 +1,54 @@
+#map {
+  height: 400px;
+  width: 100vp;
+  border-radius: 25px;
+}
+.marker-wrap {
+  position: relative;
+  width: 40px;
+  height: 40px;
+}
+
+.pulse-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 50px;
+  height: 50px;
+  background: rgba(252, 56, 92, 0.4); /* same as marker color, soft ring */
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+.custom-marker {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  background: white;
+  border: 2px solid #333;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+.custom-marker i {
+  position: absolute;
+  transform: rotate(45deg);
+  top: 50%;
+  left: 50%;
+  font-size: 18px;
+  transform: translate(-50%, -50%) rotate(45deg);
+  color: #fc385c;
+}
+
+@keyframes pulse {
+  0% {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2);
+    opacity: 0;
+  }
+}

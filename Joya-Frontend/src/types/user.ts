@@ -1,6 +1,7 @@
 export type CurrentUser = {
   _id: string;
   username: string;
+  email: string;
   role: "user" | "host" | "admin";
 
   host?: {
@@ -21,6 +22,11 @@ export type LoginResponse = {
   message: string;
   user: CurrentUser;
 };
+
+export type LogoutResponse = {
+  success: boolean;
+  message: string;
+}
 
 export type LoginCredentials = {
   username: string;
@@ -64,4 +70,50 @@ export type ResendOTPResponse = {
   message: string;
   remainingTime: number;
   canResend: boolean;
+};
+
+export type SendForgotOTPPayload = {
+  username: string;
+  email: string;
+};
+
+export type SendForgotOTPResponse = {
+  success: boolean;
+  message: string;
+  remainingCooldown?: number;
+};
+
+export type ForgotPasswordPayload = {
+  username: string;
+  email: string;
+  code: string;
+  password: string;
+  confirm: string;
+};
+
+export type ForgotPasswordResponse = {
+  success: boolean;
+  message: string;
+};
+
+export type UpdatePasswordPayload = {
+  currentPassword: string;
+  password: string;
+  confirm: string;
+};
+
+export type UpdatePasswordResponse = {
+  success: boolean;
+  message: string;
+};
+
+export type ChangeEmailPayload = {
+  newEmail: string;
+  password: string;
+};
+
+export type ChangeEmailResponse = {
+  success: boolean;
+  message: string;
+  user?: CurrentUser;
 };

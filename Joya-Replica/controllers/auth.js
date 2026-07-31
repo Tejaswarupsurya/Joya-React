@@ -4,6 +4,8 @@ const User = require("../models/user.js");
 const {
   sendOTPEmail,
   sendWelcomeEmail,
+  sendPasswordResetEmail,
+  sendPasswordUpdatedEmail,
 } = require("../utils/emailService.js");
 const {
   generateOTP,
@@ -28,6 +30,7 @@ module.exports.getCurrentUser = (req, res) => {
     currentUser: {
       _id: req.user._id,
       username: req.user.username,
+      email: req.user.email,
       role: req.user.role,
       host: req.user.host,
     },
@@ -65,6 +68,21 @@ module.exports.login = (req, res, next) => {
       });
     });
   })(req, res, next);
+};
+
+module.exports.logout = (req, res, next) => {
+  req.logout((err) => {
+    if (err) {
+      return next(err);
+    }
+
+    req.session?.destroy();
+
+    return res.status(200).json({
+      success: true,
+      message: "Logged out successfully!",
+    });
+  });
 };
 
 module.exports.signup = async (req, res) => {
@@ -266,6 +284,265 @@ module.exports.resendOTP = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to resend verification code. Please try again.",
+    });
+  }
+};
+
+module.exports.sendForgotOTP = async (req, res) => {
+  try {
+    const { username, email } = req.body;
+
+    if (!username || !email) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide both username and email.",
+      });
+    }
+
+    const user = await User.findOne({ username, email });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found with matching username and email.",
+      });
+    }
+
+    if (req.session.passwordReset?.otpIssuedAt) {
+      if (!canResendOTP(req.session.passwordReset.otpIssuedAt)) {
+        const remaining = getRemainingCooldown(
+          req.session.passwordReset.otpIssuedAt
+        );
+        return res.status(429).json({
+          success: false,
+          message: `Please wait ${remaining} seconds before requesting code again.`,
+          remainingCooldown: remaining,
+        });
+      }
+    }
+
+    const otp = generateOTP();
+    const otpToken = generateOTPToken(email, otp);
+
+    req.session.passwordReset = {
+      username,
+      email,
+      otpToken,
+      otpIssuedAt: Date.now(),
+    };
+
+    await sendPasswordResetEmail(email, otp, username);
+
+    return res.status(200).json({
+      success: true,
+      message: "Verification code sent to your email!",
+      remainingCooldown: 60,
+    });
+  } catch (error) {
+    console.error("Error generating forgot OTP:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to send reset code. Please try again.",
+    });
+  }
+};
+
+module.exports.forgotPassword = async (req, res) => {
+  try {
+    const { username, email, password, confirm, code } = req.body;
+
+    if (!req.session.passwordReset) {
+      return res.status(400).json({
+        success: false,
+        message: "Session expired. Please request a new code.",
+      });
+    }
+
+    const {
+      otpToken,
+      username: sessionUsername,
+      email: sessionEmail,
+    } = req.session.passwordReset;
+
+    if (username !== sessionUsername || email !== sessionEmail) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid credentials. Username and email must match session.",
+      });
+    }
+
+    const decoded = verifyOTPToken(otpToken);
+    if (!decoded || decoded.otp !== String(code).trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired verification code!",
+      });
+    }
+
+    if (password !== confirm) {
+      return res.status(400).json({
+        success: false,
+        message: "Passwords do not match!",
+        errors: {
+          confirm: "Passwords do not match!",
+        },
+      });
+    }
+
+    const user = await User.findOne({ username, email });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found!",
+      });
+    }
+
+    await user.setPassword(password);
+    await user.save();
+
+    req.session.passwordReset = null;
+
+    sendPasswordUpdatedEmail(user.email, user.username).catch((err) =>
+      console.error("Password updated email failed:", err)
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Password has been reset successfully! Please log in.",
+    });
+  } catch (error) {
+    console.error("Forgot password error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to reset password. Please try again.",
+    });
+  }
+};
+
+module.exports.updatePassword = async (req, res) => {
+  try {
+    const { currentPassword, password, confirm } = req.body;
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found.",
+      });
+    }
+
+    const isMatch = await user.authenticate(currentPassword);
+    if (!isMatch.user) {
+      return res.status(400).json({
+        success: false,
+        message: "Current password is incorrect!",
+        errors: {
+          currentPassword: "Current password is incorrect!",
+        },
+      });
+    }
+
+    const isSamePassword = (await user.authenticate(password)).user;
+    if (isSamePassword) {
+      return res.status(400).json({
+        success: false,
+        message: "New password cannot be the same as your current password!",
+        errors: {
+          password: "New password must be different from your current password.",
+        },
+      });
+    }
+
+    if (password !== confirm) {
+      return res.status(400).json({
+        success: false,
+        message: "Passwords do not match!",
+        errors: {
+          confirm: "Passwords do not match!",
+        },
+      });
+    }
+
+    await user.setPassword(password);
+    await user.save();
+
+    sendPasswordUpdatedEmail(user.email, user.username).catch((err) =>
+      console.error("Password updated email failed:", err)
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Password updated successfully!",
+    });
+  } catch (error) {
+    console.error("Password update error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update password. Please try again.",
+    });
+  }
+};
+
+module.exports.changeEmail = async (req, res) => {
+  try {
+    const { newEmail, password } = req.body;
+
+    if (!newEmail || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter your new email address and current password.",
+      });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found.",
+      });
+    }
+
+    const isMatch = await user.authenticate(password);
+    if (!isMatch.user) {
+      return res.status(400).json({
+        success: false,
+        message: "Current password is incorrect!",
+        errors: {
+          password: "Current password is incorrect!",
+        },
+      });
+    }
+
+    const existingUser = await User.findOne({ email: newEmail });
+    if (existingUser && existingUser._id.toString() !== user._id.toString()) {
+      return res.status(409).json({
+        success: false,
+        message: "Email already exists. Please use a different email.",
+        errors: {
+          newEmail: "Email already registered. Please use another email.",
+        },
+      });
+    }
+
+    user.email = newEmail;
+    user.isEmailVerified = true;
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Email updated successfully!",
+      user: {
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    console.error("Change email error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to change email. Please try again.",
     });
   }
 };

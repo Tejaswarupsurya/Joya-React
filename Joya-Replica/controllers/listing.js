@@ -217,14 +217,19 @@ module.exports.showListings = async (req, res) => {
       },
     })
     .populate("owner");
+
   if (!listing) {
-    req.flash("error", "The Listing you requested for Does'nt Exist!");
-    return res.redirect("/listings");
+    return res.status(404).json({
+      success: false,
+      message: "The Listing you requested for doesn't exist!",
+    });
   }
+
   const avgRating = getAvgRating(listing.reviews);
   const starBreakdown = getStarBreakdown(listing.reviews);
 
-  res.render("./listings/show.ejs", {
+  return res.status(200).json({
+    success: true,
     listing,
     categoryIcons,
     facilityIcons,
@@ -296,10 +301,21 @@ module.exports.updateListing = async (req, res) => {
 module.exports.destroyListing = async (req, res) => {
   const id = req.params.id;
   const listing = await Listing.findById(id);
+
+  if (!listing) {
+    return res.status(404).json({
+      success: false,
+      message: "Listing not found!",
+    });
+  }
+
   if (listing.image && listing.image.filename) {
     await cloudinary.uploader.destroy(listing.image.filename);
   }
   await Listing.findByIdAndDelete(id);
-  req.flash("success", "Deleted Successfully!");
-  res.redirect("/listings");
+
+  return res.status(200).json({
+    success: true,
+    message: "Deleted Successfully!",
+  });
 };

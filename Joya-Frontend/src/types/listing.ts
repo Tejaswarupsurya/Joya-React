@@ -1,3 +1,16 @@
+import type { Review, StarBreakdown } from "./review";
+
+export type ListingOwner = {
+  _id: string;
+  username: string;
+  email?: string;
+};
+
+export type ListingGeometry = {
+  type: string;
+  coordinates: [number, number];
+};
+
 export type Listing = {
   _id: string;
   title: string;
@@ -6,11 +19,23 @@ export type Listing = {
   location: string;
   country: string;
   category: string;
-
+  facilities?: string[];
+  owner?: ListingOwner;
+  reviews?: Review[];
+  geometry?: ListingGeometry;
   image: {
     url: string;
     filename: string;
   };
-
   avgRating?: number;
+};
+
+export type ListingDetailResponse = {
+  success: boolean;
+  listing: Listing;
+  categoryIcons?: Record<string, string>;
+  facilityIcons?: Record<string, string>;
+  avgRating: number;
+  starBreakdown: StarBreakdown;
+  mapToken?: string;
 };

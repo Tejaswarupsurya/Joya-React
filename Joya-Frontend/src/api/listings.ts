@@ -1,5 +1,5 @@
 import { api } from "./axios";
-import type { Listing } from "../types/listing";
+import type { Listing, ListingDetailResponse } from "../types/listing";
 
 type ListingsResponse = {
   success: boolean;
@@ -28,5 +28,21 @@ export const getListings = async (
     },
   });
 
+  return response.data;
+};
+
+export const getListingById = async (
+  id: string,
+): Promise<ListingDetailResponse> => {
+  const response = await api.get<ListingDetailResponse>(`/listings/${id}`);
+  return response.data;
+};
+
+export const deleteListing = async (
+  id: string,
+): Promise<{ success: boolean; message: string }> => {
+  const response = await api.delete<{ success: boolean; message: string }>(
+    `/listings/${id}`,
+  );
   return response.data;
 };

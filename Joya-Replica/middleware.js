@@ -131,11 +131,10 @@ module.exports.checkBookingOwnership = async (req, res, next) => {
 
 module.exports.isLoggedIn = (req, res, next) => {
   if (!req.isAuthenticated()) {
-    if (req.method === "GET") {
-      req.session.redirectUrl = req.originalUrl;
-    }
-    req.flash("error", "Login to continue");
-    return res.redirect("/login");
+    return res.status(401).json({
+      success: false,
+      message: "Login to continue",
+    });
   }
   next();
 };
@@ -161,11 +160,31 @@ module.exports.storeRedirectUrl = (req, res, next) => {
 module.exports.requireRole = (...allowedRoles) => {
   return (req, res, next) => {
     if (!req.isAuthenticated()) {
+      if (
+        req.xhr ||
+        req.headers.accept?.includes("json") ||
+        req.originalUrl.startsWith("/api/")
+      ) {
+        return res.status(401).json({
+          success: false,
+          message: "Login to continue!",
+        });
+      }
       req.flash("error", "Login to continue!");
       return res.redirect("/login");
     }
     const userRole = req.user.role;
     if (!allowedRoles.includes(userRole)) {
+      if (
+        req.xhr ||
+        req.headers.accept?.includes("json") ||
+        req.originalUrl.startsWith("/api/")
+      ) {
+        return res.status(403).json({
+          success: false,
+          message: "You are not authorized to access this page!",
+        });
+      }
       req.flash("error", "You are not authorized to access this page!");
       return res.redirect("/");
     }
@@ -178,10 +197,30 @@ module.exports.isDocOwner = (Model, field = "owner") => {
     const { id } = req.params;
     const doc = await Model.findById(id);
     if (!doc) {
+      if (
+        req.xhr ||
+        req.headers.accept?.includes("json") ||
+        req.originalUrl.startsWith("/api/")
+      ) {
+        return res.status(404).json({
+          success: false,
+          message: "Resource not found!",
+        });
+      }
       req.flash("error", "Resource not found!");
       return res.redirect("back");
     }
     if (!doc[field].equals(req.user._id) && req.user.role !== "admin") {
+      if (
+        req.xhr ||
+        req.headers.accept?.includes("json") ||
+        req.originalUrl.startsWith("/api/")
+      ) {
+        return res.status(403).json({
+          success: false,
+          message: "You don't have Access!",
+        });
+      }
       req.flash("error", "You don't have Access!");
       return res.redirect("back");
     }
@@ -191,16 +230,20 @@ module.exports.isDocOwner = (Model, field = "owner") => {
 
 module.exports.isHost = (req, res, next) => {
   if (!res.locals.currUser || res.locals.currUser.role !== "host") {
-    req.flash("error", "Only Hosts can create listings!");
-    return res.redirect("/listings");
+    return res.status(403).json({
+      success: false,
+      message: "Only Hosts can create listings!",
+    });
   }
   next();
 };
 
 module.exports.isHostOrAdmin = (req, res, next) => {
   if (!res.locals.currUser || res.locals.currUser.role === "user") {
-    req.flash("error", "Only Hosts or Admin have access!");
-    return res.redirect("/listings");
+    return res.status(403).json({
+      success: false,
+      message: "Only Hosts or Admin have access!",
+    });
   }
   next();
 };
@@ -211,19 +254,29 @@ module.exports.canApplyAsHost = (req, res, next) => {
   if (req.user.role === "host" && req.user.host.status === "rejected")
     return next();
 
-  req.flash("error", "You already have an active host application!");
-  return res.redirect("/dashboard");
+  return res.status(400).json({
+    success: false,
+    message: "You already have an active host application!",
+  });
 };
 
 module.exports.isOwner = async (req, res, next) => {
   let { id } = req.params;
   let listing = await Listing.findById(id);
+  if (!listing) {
+    return res.status(404).json({
+      success: false,
+      message: "Listing not found!",
+    });
+  }
   if (
     !listing.owner.equals(res.locals.currUser._id) &&
     res.locals.currUser.role !== "admin"
   ) {
-    req.flash("error", "You don't have Access!");
-    return res.redirect(`/listings/${id}`);
+    return res.status(403).json({
+      success: false,
+      message: "You don't have Access!",
+    });
   }
   next();
 };
@@ -231,23 +284,34 @@ module.exports.isOwner = async (req, res, next) => {
 module.exports.isReviewAuthor = async (req, res, next) => {
   let { id, reviewId } = req.params;
   let review = await Review.findById(reviewId);
+  if (!review) {
+    return res.status(404).json({
+      success: false,
+      message: "Review not found!",
+    });
+  }
   if (
     !review.author.equals(res.locals.currUser._id) &&
     res.locals.currUser.role !== "admin"
   ) {
-    req.flash("error", "You aren't the Author of this Review!");
-    return res.redirect(`/listings/${id}`);
+    return res.status(403).json({
+      success: false,
+      message: "You aren't the Author of this Review!",
+    });
   }
   next();
 };
+
 module.exports.isAlreadyReviewed = async (req, res, next) => {
   const listing = await Listing.findById(req.params.id).populate("reviews");
   const alreadyReviewed = listing.reviews.some((r) =>
     r.author.equals(req.user._id)
   );
   if (alreadyReviewed) {
-    req.flash("error", "You have already reviewed!");
-    return res.redirect(`/listings/${listing._id}`);
+    return res.status(400).json({
+      success: false,
+      message: "You have already reviewed!",
+    });
   }
   next();
 };

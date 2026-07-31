@@ -148,6 +148,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/listings", listingRouter);
 app.use("/api/auth", authApiRouter);
+app.use("/api/listings/:id/reviews", reviewRouter);
 app.use("/listings/:id/reviews", reviewRouter);
 app.use("/listings/:id/bookings", bookingRouter);
 app.use("/api/wishlist", wishlistRouter);

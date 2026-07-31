@@ -2,9 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import {
   Link,
   useLocation,
+  useNavigate,
   useSearchParams,
 } from "react-router-dom";
-import type { CurrentUser } from "../../types/user";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+
+import { logout } from "../../api/auth";
+import type { CurrentUser, AuthResponse } from "../../types/user";
 import logo from "../../assets/logo.png";
 import "./Navbar.css";
 
@@ -22,12 +27,35 @@ const hiddenSearchRoutes = [
 
 export default function Navbar({ currentUser }: NavbarProps) {
   const location = useLocation();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [searchInput, setSearchInput] = useState(searchParams.get("q") ?? "");
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const hideTimeoutRef = useRef<number | null>(null);
+
+  const logoutMutation = useMutation({
+    mutationFn: logout,
+    onSuccess: (data) => {
+      queryClient.setQueryData<AuthResponse>(["auth"], {
+        currentUser: null,
+        userWishlist: [],
+      });
+      queryClient.invalidateQueries({ queryKey: ["auth"] });
+      toast.success(data.message || "Logged out successfully!");
+      navigate("/login");
+    },
+    onError: () => {
+      toast.error("Failed to log out. Please try again.");
+    },
+  });
+
+  const handleLogout = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    logoutMutation.mutate();
+  };
 
   useEffect(() => {
     return () => {
@@ -65,8 +93,6 @@ export default function Navbar({ currentUser }: NavbarProps) {
       window.clearTimeout(timeoutId);
     };
   }, [searchInput, location.pathname, setSearchParams]);
-
-  const shouldShowSearch = !hiddenSearchRoutes.includes(location.pathname);
 
   const handleWishlistClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
     if (location.pathname === "/dashboard") {
@@ -125,6 +151,14 @@ export default function Navbar({ currentUser }: NavbarProps) {
       : currentUser?.role === "host" && currentUser.host?.avatar?.url
         ? currentUser.host.avatar.url
         : null;
+
+  const isListingDetail =
+    location.pathname.startsWith("/listings/") &&
+    location.pathname !== "/listings" &&
+    location.pathname !== "/listings/new";
+
+  const shouldShowSearch =
+    !hiddenSearchRoutes.includes(location.pathname) && !isListingDetail;
 
   return (
     <nav className="navbar navbar-expand-md bg-body-light border-bottom custom-sticky sticky-top">
@@ -308,10 +342,15 @@ export default function Navbar({ currentUser }: NavbarProps) {
                         <hr className="dropdown-divider" />
                       </li>
                       <li>
-                        <a className="dropdown-item text-danger" href="/logout">
+                        <button
+                          type="button"
+                          className="dropdown-item text-danger border-0 bg-transparent"
+                          onClick={handleLogout}
+                          disabled={logoutMutation.isPending}
+                        >
                           <i className="fa-solid fa-right-from-bracket me-2"></i>
-                          Log out
-                        </a>
+                          {logoutMutation.isPending ? "Logging out..." : "Log out"}
+                        </button>
                       </li>
                     </ul>
                   </div>

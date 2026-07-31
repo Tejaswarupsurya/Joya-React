@@ -265,6 +265,11 @@ module.exports.update = async (req, res) => {
       req.flash("error", "Current password is incorrect!");
       return res.redirect("/update-password");
     }
+    const isSamePassword = (await user.authenticate(password)).user;
+    if (isSamePassword) {
+      req.flash("error", "New password must be different from your current password!");
+      return res.redirect("/update-password");
+    }
     if (password !== confirm) {
       req.flash("error", "Passwords do not match!");
       return res.redirect("/update-password");

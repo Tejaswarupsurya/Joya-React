@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import { toast } from "sonner";
 
 import {
   getPendingVerification,
@@ -76,7 +77,13 @@ export default function VerifyEmailPage() {
         });
         queryClient.invalidateQueries({ queryKey: ["auth"] });
       }
+      toast.success(data.message || "Welcome to Joya! Email verified successfully.");
       navigate("/listings");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError && !error.response) {
+        toast.error("Network error. Please check your connection and try again.");
+      }
     },
   });
 
@@ -87,13 +94,18 @@ export default function VerifyEmailPage() {
       setTimeLeft(data.remainingTime ?? 600);
       setCooldown(60);
       setFeedbackMessage(data.message || "New verification code sent!");
+      toast.success(data.message || "New verification code sent!");
       setOtp("");
     },
     onError: (err) => {
-      if (err instanceof AxiosError && err.response?.data) {
-        const data = err.response.data as { message?: string; remainingCooldown?: number };
-        if (data.remainingCooldown) {
-          setCooldown(data.remainingCooldown);
+      if (err instanceof AxiosError) {
+        if (!err.response) {
+          toast.error("Network error. Please check your connection and try again.");
+        } else if (err.response.data) {
+          const data = err.response.data as { message?: string; remainingCooldown?: number };
+          if (data.remainingCooldown) {
+            setCooldown(data.remainingCooldown);
+          }
         }
       }
     },
