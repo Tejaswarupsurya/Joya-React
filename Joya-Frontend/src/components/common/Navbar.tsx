@@ -142,7 +142,7 @@ export default function Navbar({ currentUser }: NavbarProps) {
     currentUser?.role === "admin"
       ? "/admin/dashboard"
       : currentUser?.role === "host"
-        ? "/hosts/dashboard"
+        ? "/host/dashboard"
         : "/dashboard";
 
   const avatarSrc =

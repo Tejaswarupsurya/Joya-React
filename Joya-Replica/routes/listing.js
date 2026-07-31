@@ -42,9 +42,6 @@ router
     wrapAsync(listingController.createListing)
   );
 
-//New route
-router.get("/new", isLoggedIn, isHost, listingController.renderNewForm);
-
 router
   .route("/:id")
   .get(wrapAsync(listingController.showListings))

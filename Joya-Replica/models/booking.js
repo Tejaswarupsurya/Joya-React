@@ -27,9 +27,9 @@ const bookingSchema = new Schema({
   expiresAt: {
     type: Date,
     default: function () {
-      // Set expiration to 24 hours from creation if status is pending_payment
+      // Set expiration to 30 minutes from creation if status is pending_payment
       return this.status === "pending_payment"
-        ? new Date(Date.now() + 24 * 60 * 60 * 1000)
+        ? new Date(Date.now() + 30 * 60 * 1000)
         : null;
     },
   },
@@ -38,7 +38,7 @@ const bookingSchema = new Schema({
 // Middleware to set expiration date when creating pending bookings
 bookingSchema.pre("save", function (next) {
   if (this.isNew && this.status === "pending_payment") {
-    this.expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+    this.expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
   } else if (this.status === "confirmed" || this.status === "cancelled") {
     this.expiresAt = null; // Remove expiration for confirmed/cancelled bookings
   }

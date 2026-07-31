@@ -67,8 +67,10 @@ module.exports.validateUpdatePassword = (req, res, next) => {
   });
   if (error) {
     const errmsg = error.details.map((el) => el.message).join(", ");
-    req.flash("error", errmsg);
-    return res.redirect("/update-password");
+    return res.status(400).json({
+      success: false,
+      message: errmsg,
+    });
   }
   next();
 };
@@ -79,8 +81,10 @@ module.exports.validateReset = (req, res, next) => {
   });
   if (error) {
     const errmsg = error.details.map((el) => el.message).join(", ");
-    req.flash("error", errmsg);
-    return res.redirect("/forgot");
+    return res.status(400).json({
+      success: false,
+      message: errmsg,
+    });
   }
   next();
 };
@@ -101,8 +105,10 @@ module.exports.validateHostApplication = (req, res, next) => {
   });
   if (error) {
     let errMsg = error.details.map((el) => el.message).join(", ");
-    req.flash("error", errMsg);
-    return res.redirect("/apply");
+    return res.status(400).json({
+      success: false,
+      message: errMsg,
+    });
   } else {
     next();
   }

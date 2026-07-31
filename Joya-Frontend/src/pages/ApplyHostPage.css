@@ -1,4 +1,4 @@
-/* Host Application Form Styles */
+/* Host Apply Page Styles — exact port of public/css/host-apply.css */
 
 .photo-upload-frame {
   border: 3px dashed #dee2e6;
@@ -63,7 +63,6 @@
 }
 
 .preview-container {
-  display: none;
   position: relative;
 }
 
@@ -98,10 +97,24 @@
   margin-bottom: 2rem;
 }
 
-.section-title {
+.apply-section-title {
   color: #495057;
   font-weight: 600;
   margin-bottom: 1.5rem;
   padding-bottom: 0.5rem;
   border-bottom: 2px solid #f8f9fa;
+}
+
+.help-link-btn {
+  color: #495057;
+  border: 1px solid #6c757d;
+  background-color: transparent;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.help-link-btn:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+  color: #495057;
 }

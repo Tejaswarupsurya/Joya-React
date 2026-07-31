@@ -8,7 +8,7 @@ const geocodingClient = mbxGeocoding({ accessToken: mapToken });
 
 //utils section
 
-const { getAvgRating, getStarBreakdown } = require("../utils/review.js");
+const { getAvgRating } = require("../utils/review.js");
 const { expandQuery } = require("../utils/searchSynonyms.js");
 
 //mongodb Section
@@ -198,10 +198,6 @@ function calculateRelevanceScore(listing, query) {
   return score;
 }
 
-module.exports.renderNewForm = (req, res) => {
-  res.render("./listings/new.ejs", { facilitiesList });
-};
-
 module.exports.showListings = async (req, res) => {
   const id = req.params.id;
   const listing = await Listing.findById(id)
@@ -227,21 +223,45 @@ module.exports.showListings = async (req, res) => {
 };
 
 module.exports.createListing = async (req, res) => {
+  const file = req.file;
+  const url = file?.path || file?.secure_url || file?.url;
+  const filename = file?.filename || file?.public_id || file?.originalname || "image";
+
+  if (!file || !url) {
+    console.error("createListing error: req.file missing or invalid:", req.file);
+    return res.status(400).json({
+      success: false,
+      message: "Image upload failed or file is missing!",
+    });
+  }
+
   let response = await geocodingClient
     .forwardGeocode({
       query: req.body.listing.location,
       limit: 1,
     })
     .send();
-  let url = req.file.path;
-  let filename = req.file.filename;
+
   const newListing = new Listing(req.body.listing);
   newListing.owner = req.user._id;
   newListing.image = { url, filename };
-  newListing.geometry = response.body.features[0].geometry;
+
+  if (response.body?.features && response.body.features.length > 0) {
+    newListing.geometry = response.body.features[0].geometry;
+  } else {
+    newListing.geometry = {
+      type: "Point",
+      coordinates: [0, 0],
+    };
+  }
+
   await newListing.save();
-  req.flash("success", "New Hotel Added!");
-  res.redirect("/listings");
+
+  return res.status(201).json({
+    success: true,
+    message: "New Hotel Added!",
+    listing: newListing,
+  });
 };
 
 module.exports.renderEditForm = async (req, res) => {
@@ -301,9 +321,12 @@ module.exports.updateListing = async (req, res) => {
 
   // Update image if new file uploaded
   if (typeof req.file !== "undefined") {
-    let url = req.file.path;
-    let filename = req.file.filename;
-    listing.image = { url, filename };
+    const file = req.file;
+    const url = file?.path || file?.secure_url || file?.url;
+    const filename = file?.filename || file?.public_id || file?.originalname || "image";
+    if (url) {
+      listing.image = { url, filename };
+    }
   }
 
   await listing.save();

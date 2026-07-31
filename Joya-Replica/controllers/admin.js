@@ -1,21 +1,25 @@
-//mongodb Section
 const User = require("../models/user.js");
 
-// List all host applications (pending, approved, rejected) with filtering UI
+// List all host applications (pending, approved, rejected)
 module.exports.listAllApplications = async (req, res) => {
   try {
     const allApplications = await User.find({
       "host.status": { $in: ["pending", "approved", "rejected"] },
-    }).select("username email host role");
+    })
+      .select("username email host role")
+      .sort({ "host.appliedAt": -1 })
+      .lean();
 
-    res.render("admin/dashboard.ejs", {
+    return res.status(200).json({
+      success: true,
       applications: allApplications,
-      user: req.user,
     });
   } catch (error) {
     console.error("Error fetching host applications:", error);
-    req.flash("error", "Failed to load host applications.");
-    res.redirect("/listings");
+    return res.status(500).json({
+      success: false,
+      message: "Failed to load host applications. Error: " + error.message,
+    });
   }
 };
 
@@ -26,13 +30,17 @@ module.exports.approveApplication = async (req, res) => {
 
     const user = await User.findById(userId);
     if (!user) {
-      req.flash("error", "User not found.");
-      return res.redirect("/admin/pending");
+      return res.status(404).json({
+        success: false,
+        message: "User not found.",
+      });
     }
 
-    if (user.host.status !== "pending") {
-      req.flash("error", "Application is not in pending status.");
-      return res.redirect("/admin/pending");
+    if (user.host?.status !== "pending") {
+      return res.status(400).json({
+        success: false,
+        message: "Application is not in pending status.",
+      });
     }
 
     // Update user to approved host
@@ -43,15 +51,16 @@ module.exports.approveApplication = async (req, res) => {
 
     await user.save();
 
-    req.flash(
-      "success",
-      `Host application for ${user.username} has been approved successfully!`
-    );
-    res.redirect("/admin/dashboard");
+    return res.status(200).json({
+      success: true,
+      message: `Host application for ${user.username} has been approved successfully!`,
+    });
   } catch (error) {
     console.error("Error approving application:", error);
-    req.flash("error", "Failed to approve application.");
-    res.redirect("/admin/dashboard");
+    return res.status(500).json({
+      success: false,
+      message: "Failed to approve application. Error: " + error.message,
+    });
   }
 };
 
@@ -62,42 +71,46 @@ module.exports.rejectApplication = async (req, res) => {
 
     const user = await User.findById(userId);
     if (!user) {
-      req.flash("error", "User not found.");
-      return res.redirect("/admin/pending");
+      return res.status(404).json({
+        success: false,
+        message: "User not found.",
+      });
     }
 
-    if (user.host.status !== "pending") {
-      req.flash("error", "Application is not in pending status.");
-      return res.redirect("/admin/pending");
+    if (user.host?.status !== "pending") {
+      return res.status(400).json({
+        success: false,
+        message: "Application is not in pending status.",
+      });
     }
 
     // Update user to rejected
     user.host.status = "rejected";
     user.host.isHost = false;
-    // Keep role as "user" since they're not approved as host
 
     await user.save();
 
-    req.flash(
-      "success",
-      `Host application for ${user.username} has been rejected.`
-    );
-    res.redirect("/admin/dashboard");
+    return res.status(200).json({
+      success: true,
+      message: `Host application for ${user.username} has been rejected.`,
+    });
   } catch (error) {
     console.error("Error rejecting application:", error);
-    req.flash("error", "Failed to reject application.");
-    res.redirect("/admin/dashboard");
+    return res.status(500).json({
+      success: false,
+      message: "Failed to reject application. Error: " + error.message,
+    });
   }
 };
 
-// Admin Email Recovery - Help users who entered wrong email during signup
+// Admin Email Recovery
 module.exports.adminEmailRecovery = async (req, res) => {
   try {
     const { userId, newEmail } = req.body;
 
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({ success: false, error: "User not found" });
+      return res.status(404).json({ success: false, message: "User not found" });
     }
 
     // Check if new email already exists
@@ -105,22 +118,22 @@ module.exports.adminEmailRecovery = async (req, res) => {
     if (existingUser && existingUser._id.toString() !== user._id.toString()) {
       return res
         .status(400)
-        .json({ success: false, error: "Email already exists" });
+        .json({ success: false, message: "Email already exists" });
     }
 
-    // Update email and auto-verify it (no email sending)
+    // Update email and auto-verify it
     user.email = newEmail;
     user.isEmailVerified = true;
     user.emailVerificationToken = undefined;
     user.emailVerificationExpires = undefined;
     await user.save();
 
-    res.json({
+    return res.status(200).json({
       success: true,
       message: `Email updated to ${newEmail} and automatically verified.`,
     });
   } catch (error) {
     console.error("Error in admin email recovery:", error);
-    res.status(500).json({ success: false, error: "Failed to update email" });
+    return res.status(500).json({ success: false, message: "Failed to update email" });
   }
 };

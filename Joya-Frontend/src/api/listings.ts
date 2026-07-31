@@ -59,11 +59,18 @@ export const updateListing = async (
     success: boolean;
     message: string;
     listing: Listing;
-  }>(`/listings/${id}`, formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
+  }>(`/listings/${id}`, formData);
+  return response.data;
+};
+
+export const createListing = async (
+  formData: FormData,
+): Promise<{ success: boolean; message: string; listing: Listing }> => {
+  const response = await api.post<{
+    success: boolean;
+    message: string;
+    listing: Listing;
+  }>("/listings", formData);
   return response.data;
 };
 
