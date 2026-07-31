@@ -248,42 +248,71 @@ module.exports.renderEditForm = async (req, res) => {
   const id = req.params.id;
   const listing = await Listing.findById(id);
   if (!listing) {
-    req.flash("error", "The Listing you requested for Does'nt Exist!");
-    return res.redirect("/listings");
+    return res.status(404).json({
+      success: false,
+      message: "The Listing you requested for does not exist!",
+    });
   }
-  let originalImageUrl = listing.image.url;
-  originalImageUrl = originalImageUrl.replace(
-    "/upload",
-    "/upload/w_250,f_auto,q_auto"
-  );
-  res.render("./listings/edit.ejs", {
+  let originalImageUrl = listing.image?.url;
+  if (originalImageUrl) {
+    originalImageUrl = originalImageUrl.replace(
+      "/upload",
+      "/upload/w_250,f_auto,q_auto"
+    );
+  }
+  return res.status(200).json({
+    success: true,
     listing,
     originalImageUrl,
-    // categoryList,
-    // facilitiesList,
   });
 };
 
 module.exports.updateListing = async (req, res) => {
   const id = req.params.id;
-  let listing = await Listing.findByIdAndUpdate(id, { ...req.body.listing });
+  let listing = await Listing.findById(id);
 
-  let response = await geocodingClient
-    .forwardGeocode({
-      query: req.body.listing.location,
-      limit: 1,
-    })
-    .send();
-  if (typeof req.file != "undefined") {
+  if (!listing) {
+    return res.status(404).json({
+      success: false,
+      message: "Listing not found!",
+    });
+  }
+
+  // Handle facilities parsing if passed as array or single value
+  if (req.body.listing) {
+    if (typeof req.body.listing.facilities === "string") {
+      req.body.listing.facilities = [req.body.listing.facilities];
+    }
+    Object.assign(listing, req.body.listing);
+  }
+
+  // Update geocoding if location is provided
+  if (req.body.listing?.location) {
+    let response = await geocodingClient
+      .forwardGeocode({
+        query: req.body.listing.location,
+        limit: 1,
+      })
+      .send();
+    if (response.body.features && response.body.features.length > 0) {
+      listing.geometry = response.body.features[0].geometry;
+    }
+  }
+
+  // Update image if new file uploaded
+  if (typeof req.file !== "undefined") {
     let url = req.file.path;
     let filename = req.file.filename;
     listing.image = { url, filename };
-    await listing.save();
   }
-  listing.geometry = response.body.features[0].geometry;
+
   await listing.save();
-  req.flash("success", "Updated Successfully!");
-  res.redirect(`/listings/${id}`);
+
+  return res.status(200).json({
+    success: true,
+    message: "Updated Successfully!",
+    listing,
+  });
 };
 
 module.exports.destroyListing = async (req, res) => {
