@@ -4,24 +4,15 @@ if (process.env.NODE_ENV != "production") {
 
 //Express Section
 const express = require("express");
-const ejsMate = require("ejs-mate");
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
-const flash = require("connect-flash");
 const app = express();
-const path = require("path");
-const methodOverride = require("method-override");
 const compression = require("compression");
 const cors = require("cors");
 const helmet = require("helmet");
 
 const port = process.env.PORT || 3000;
 
-app.set("view engine", "ejs");
-app.engine("ejs", ejsMate);
-app.set("views", path.join(__dirname, "/views"));
-app.use(express.static(path.join(__dirname, "/public")));
-app.use(methodOverride("_method"));
 app.use(
   cors({
     origin: "http://localhost:5173",
@@ -57,7 +48,6 @@ const listingRouter = require("./routes/listing.js");
 const reviewRouter = require("./routes/review.js");
 const userRouter = require("./routes/user.js");
 const authApiRouter = require("./routes/api/auth.js");
-const infoRouter = require("./routes/info.js");
 const bookingRouter = require("./routes/booking");
 const hostRouter = require("./routes/host");
 const adminRouter = require("./routes/admin");
@@ -93,7 +83,7 @@ if (!isTestEnv) {
     });
 }
 
-//Mongo-Connect,Express-Session & Flash
+//Mongo-Connect & Express-Session
 const sessionOptions = {
   secret: process.env.SECRET || "dev-secret",
   resave: false,
@@ -122,24 +112,14 @@ if (!isTestEnv && dbUrl) {
   sessionOptions.store = store;
 }
 app.use(session(sessionOptions));
-app.use(flash());
 
-//Using Passport(Authentication & Authorization)
+//Using Passport (Authentication & Authorization)
 app.use(passport.initialize());
 app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()));
 
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
-
-//Middleware for using flash
-app.use((req, res, next) => {
-  res.locals.success = req.flash("success");
-  res.locals.error = req.flash("error");
-  res.locals.path = req.path;
-  res.locals.currUser = req.user;
-  next();
-});
 
 //Routes Section
 app.get("/", (req, res) => {
@@ -149,19 +129,13 @@ app.get("/", (req, res) => {
 app.use("/api/listings", listingRouter);
 app.use("/api/auth", authApiRouter);
 app.use("/api/listings/:id/reviews", reviewRouter);
-app.use("/listings/:id/reviews", reviewRouter);
 app.use("/api/listings/:id/bookings", bookingRouter);
-app.use("/listings/:id/bookings", bookingRouter);
 app.use("/api/wishlist", wishlistRouter);
-app.use("/info/:page", infoRouter);
 app.use("/api/payments", paymentRouter);
 app.use("/payments", paymentRouter);
 app.use("/api", userRouter);
 app.use("/api", hostRouter);
 app.use("/api", adminRouter);
-app.use("/", adminRouter);
-app.use("/", hostRouter);
-app.use("/", userRouter);
 
 app.all(/.*/, (req, res, next) => {
   next(new ExpressError(404, "Page not found!"));

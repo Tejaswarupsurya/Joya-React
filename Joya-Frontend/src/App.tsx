@@ -18,6 +18,8 @@ import NewBookingPage from "./pages/NewBookingPage";
 import BookingDetailPage from "./pages/BookingDetailPage";
 import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 import PaymentCancelPage from "./pages/PaymentCancelPage";
+import InfoComingSoonPage from "./pages/InfoComingSoonPage";
+import NotFoundPage from "./pages/NotFoundPage";
 
 function App() {
   return (
@@ -43,9 +45,14 @@ function App() {
         <Route path="/forgot" element={<ForgotPasswordPage />} />
         <Route path="/update-password" element={<UpdatePasswordPage />} />
         <Route path="/change-email" element={<ChangeEmailPage />} />
+        {/* Info pages — coming soon */}
+        <Route path="/info/:page" element={<InfoComingSoonPage />} />
+        {/* Catch-all 404 */}
+        <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>
   );
 }
 
 export default App;
+

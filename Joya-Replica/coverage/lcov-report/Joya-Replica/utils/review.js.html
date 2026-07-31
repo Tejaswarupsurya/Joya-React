@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for Joya/routes/info.js</title>
+    <title>Code coverage report for Joya-Replica/utils/review.js</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../prettify.css" />
     <link rel="stylesheet" href="../../base.css" />
@@ -19,27 +19,27 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../../index.html">All files</a> / <a href="index.html">Joya/routes</a> info.js</h1>
+        <h1><a href="../../index.html">All files</a> / <a href="index.html">Joya-Replica/utils</a> review.js</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">40% </span>
+                <span class="strong">46.15% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>4/10</span>
+                <span class='fraction'>6/13</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">50% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/2</span>
+                <span class='fraction'>4/8</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">66.66% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/1</span>
+                <span class='fraction'>2/3</span>
             </div>
         
             
@@ -85,35 +85,15 @@
 <a name='L20'></a><a href='#L20'>20</a>
 <a name='L21'></a><a href='#L21'>21</a>
 <a name='L22'></a><a href='#L22'>22</a>
-<a name='L23'></a><a href='#L23'>23</a>
-<a name='L24'></a><a href='#L24'>24</a>
-<a name='L25'></a><a href='#L25'>25</a>
-<a name='L26'></a><a href='#L26'>26</a>
-<a name='L27'></a><a href='#L27'>27</a>
-<a name='L28'></a><a href='#L28'>28</a>
-<a name='L29'></a><a href='#L29'>29</a>
-<a name='L30'></a><a href='#L30'>30</a>
-<a name='L31'></a><a href='#L31'>31</a>
-<a name='L32'></a><a href='#L32'>32</a>
-<a name='L33'></a><a href='#L33'>33</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L23'></a><a href='#L23'>23</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -121,44 +101,34 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const express = require("express");
-const router = express.Router({ mergeParams: true });
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">function getAvgRating(reviews) {
+  if (!reviews || reviews.length === 0) return 0;
+  const total = reviews.reduce((sum, r) =&gt; sum + r.rating, 0);
+  return total / reviews.length;
+}
 &nbsp;
-router.get("/", <span class="fstat-no" title="function not covered" >(r</span>eq, res) =&gt; {
-  const { page } = <span class="cstat-no" title="statement not covered" >req.params;</span>
-  const pages = <span class="cstat-no" title="statement not covered" >{</span>
-    "help-center": "Help Center",
-    faq: "Frequently Asked Questions",
-    terms: "Terms and Conditions",
-    privacy: "Privacy Policy",
-    sitemap: "Sitemap",
-    "company-info": "About Joya",
-    contact: "Contact Us",
-    careers: "Careers",
-    "host-guide": "Become a Host",
-    safety: "Safety &amp; Security",
-    accessibility: "Accessibility",
-    community: "Community Guidelines",
-  };
+function <span class="fstat-no" title="function not covered" >getStarBreakdown(</span>reviews) {
+  const breakdown = <span class="cstat-no" title="statement not covered" >{ 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };</span>
+<span class="cstat-no" title="statement not covered" >  if (!reviews) <span class="cstat-no" title="statement not covered" >return breakdown;</span></span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  if (!pages[page]) {</span>
-<span class="cstat-no" title="statement not covered" >    req.flash("error", "Page not found.");</span>
-<span class="cstat-no" title="statement not covered" >    return res.redirect("/listings");</span>
+<span class="cstat-no" title="statement not covered" >  for (const review of reviews) {</span>
+<span class="cstat-no" title="statement not covered" >    if (breakdown[review.rating] !== undefined) {</span>
+<span class="cstat-no" title="statement not covered" >      breakdown[review.rating]++;</span>
+    }
   }
+<span class="cstat-no" title="statement not covered" >  return breakdown;</span>
+}
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  res.render(`./info/${page}.ejs`, {</span>
-    title: pages[page],
-    currentPage: page,
-  });
-});
-&nbsp;
-module.exports = router;
+module.exports = {
+  getAvgRating,
+  getStarBreakdown,
+};
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
@@ -166,7 +136,7 @@ module.exports = router;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-12-19T11:56:43.249Z
+                at 2026-07-31T23:07:46.514Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

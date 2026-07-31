@@ -5,14 +5,6 @@ const { getAvgRating } = require("../utils/review.js");
 // User Dashboard Controller
 module.exports.renderDashboard = async (req, res) => {
   try {
-    if (req.user?.role === "admin") {
-      return res.redirect("/admin/dashboard");
-    }
-
-    if (req.user?.role === "host") {
-      return res.redirect("/host/dashboard");
-    }
-
     const userId = req.user._id;
 
     // First, expire any old pending bookings

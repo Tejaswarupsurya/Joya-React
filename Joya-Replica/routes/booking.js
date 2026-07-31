@@ -4,7 +4,6 @@ const router = express.Router({ mergeParams: true });
 //middlewares
 const {
   isLoggedIn,
-  validateBooking,
   checkBookingOwnership,
 } = require("../middleware");
 

@@ -21,7 +21,6 @@ const upload = multer({
 const {
   isLoggedIn,
   canApplyAsHost,
-  storeRedirectUrl,
   validateHostApplication,
 } = require("../middleware.js");
 

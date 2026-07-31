@@ -1,4 +1,4 @@
-//mongodb Section
+// mongodb Section
 const Listing = require("./models/listing.js");
 const Review = require("./models/review.js");
 const Booking = require("./models/booking.js");
@@ -8,17 +8,16 @@ const {
   reviewSchema,
   resetPasswordSchema,
   updatePasswordSchema,
-  bookingSchema,
   hostApplicationSchema,
 } = require("./schema.js");
 
-//utils Section
+// utils Section
 const ExpressError = require("./utils/ExpressError.js");
 
 module.exports.validateListing = (req, res, next) => {
   let { error } = listingSchema.validate(req.body, { abortEarly: false });
   if (error) {
-    let errMsg = error.details.map((el) => el.message).join(",");
+    let errMsg = error.details.map((el) => el.message).join(", ");
     throw new ExpressError(400, errMsg);
   } else {
     next();
@@ -28,7 +27,7 @@ module.exports.validateListing = (req, res, next) => {
 module.exports.validateReview = (req, res, next) => {
   let { error } = reviewSchema.validate(req.body, { abortEarly: false });
   if (error) {
-    let errMsg = error.details.map((el) => el.message).join(",");
+    let errMsg = error.details.map((el) => el.message).join(", ");
     throw new ExpressError(400, errMsg);
   } else {
     next();
@@ -89,16 +88,6 @@ module.exports.validateReset = (req, res, next) => {
   next();
 };
 
-module.exports.validateBooking = (req, res, next) => {
-  const { error } = bookingSchema.validate(req.body, { abortEarly: false });
-  if (error) {
-    let errMsg = error.details.map((el) => el.message).join(", ");
-    req.flash("error", errMsg);
-    return res.redirect(`/listings/${req.params.id}/bookings/new`);
-  } else {
-    next();
-  }
-};
 module.exports.validateHostApplication = (req, res, next) => {
   let { error } = hostApplicationSchema.validate(req.body, {
     abortEarly: false,
@@ -150,98 +139,28 @@ module.exports.isLoggedIn = (req, res, next) => {
   }
   next();
 };
-module.exports.saveRedirectUrl = (req, res, next) => {
-  if (req.session.redirectUrl) {
-    res.locals.redirectUrl = req.session.redirectUrl;
-  }
-  next();
-};
-
-const excludedPaths = ["/login", "/signup", "/forgot", "/change-password"];
-module.exports.storeRedirectUrl = (req, res, next) => {
-  if (
-    req.method === "GET" &&
-    !req.session.redirectUrl &&
-    !excludedPaths.includes(req.originalUrl)
-  ) {
-    req.session.redirectUrl = req.originalUrl;
-  }
-  next();
-};
 
 module.exports.requireRole = (...allowedRoles) => {
   return (req, res, next) => {
     if (!req.isAuthenticated()) {
-      if (
-        req.xhr ||
-        req.headers.accept?.includes("json") ||
-        req.originalUrl.startsWith("/api/")
-      ) {
-        return res.status(401).json({
-          success: false,
-          message: "Login to continue!",
-        });
-      }
-      req.flash("error", "Login to continue!");
-      return res.redirect("/login");
+      return res.status(401).json({
+        success: false,
+        message: "Login to continue!",
+      });
     }
     const userRole = req.user.role;
     if (!allowedRoles.includes(userRole)) {
-      if (
-        req.xhr ||
-        req.headers.accept?.includes("json") ||
-        req.originalUrl.startsWith("/api/")
-      ) {
-        return res.status(403).json({
-          success: false,
-          message: "You are not authorized to access this page!",
-        });
-      }
-      req.flash("error", "You are not authorized to access this page!");
-      return res.redirect("/");
-    }
-    next();
-  };
-};
-
-module.exports.isDocOwner = (Model, field = "owner") => {
-  return async (req, res, next) => {
-    const { id } = req.params;
-    const doc = await Model.findById(id);
-    if (!doc) {
-      if (
-        req.xhr ||
-        req.headers.accept?.includes("json") ||
-        req.originalUrl.startsWith("/api/")
-      ) {
-        return res.status(404).json({
-          success: false,
-          message: "Resource not found!",
-        });
-      }
-      req.flash("error", "Resource not found!");
-      return res.redirect("back");
-    }
-    if (!doc[field].equals(req.user._id) && req.user.role !== "admin") {
-      if (
-        req.xhr ||
-        req.headers.accept?.includes("json") ||
-        req.originalUrl.startsWith("/api/")
-      ) {
-        return res.status(403).json({
-          success: false,
-          message: "You don't have Access!",
-        });
-      }
-      req.flash("error", "You don't have Access!");
-      return res.redirect("back");
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to access this page!",
+      });
     }
     next();
   };
 };
 
 module.exports.isHost = (req, res, next) => {
-  if (!res.locals.currUser || res.locals.currUser.role !== "host") {
+  if (!req.user || req.user.role !== "host") {
     return res.status(403).json({
       success: false,
       message: "Only Hosts can create listings!",
@@ -251,7 +170,7 @@ module.exports.isHost = (req, res, next) => {
 };
 
 module.exports.isHostOrAdmin = (req, res, next) => {
-  if (!res.locals.currUser || res.locals.currUser.role === "user") {
+  if (!req.user || req.user.role === "user") {
     return res.status(403).json({
       success: false,
       message: "Only Hosts or Admin have access!",
@@ -263,7 +182,7 @@ module.exports.isHostOrAdmin = (req, res, next) => {
 module.exports.canApplyAsHost = (req, res, next) => {
   if (req.user.role === "user") return next();
 
-  if (req.user.role === "host" && req.user.host.status === "rejected")
+  if (req.user.role === "host" && req.user.host?.status === "rejected")
     return next();
 
   return res.status(400).json({
@@ -282,8 +201,8 @@ module.exports.isOwner = async (req, res, next) => {
     });
   }
   if (
-    !listing.owner.equals(res.locals.currUser._id) &&
-    res.locals.currUser.role !== "admin"
+    !listing.owner.equals(req.user._id) &&
+    req.user.role !== "admin"
   ) {
     return res.status(403).json({
       success: false,
@@ -304,9 +223,9 @@ module.exports.isReviewAuthor = async (req, res, next) => {
   }
 
   let listing = await Listing.findById(id);
-  const isAuthor = review.author.equals(res.locals.currUser._id);
-  const isAdmin = res.locals.currUser.role === "admin";
-  const isHostOwner = listing && listing.owner.equals(res.locals.currUser._id);
+  const isAuthor = review.author.equals(req.user._id);
+  const isAdmin = req.user.role === "admin";
+  const isHostOwner = listing && listing.owner.equals(req.user._id);
 
   if (!isAuthor && !isAdmin && !isHostOwner) {
     return res.status(403).json({
@@ -319,6 +238,9 @@ module.exports.isReviewAuthor = async (req, res, next) => {
 
 module.exports.isAlreadyReviewed = async (req, res, next) => {
   const listing = await Listing.findById(req.params.id).populate("reviews");
+  if (!listing) {
+    return res.status(404).json({ success: false, message: "Listing not found!" });
+  }
   const alreadyReviewed = listing.reviews.some((r) =>
     r.author.equals(req.user._id)
   );

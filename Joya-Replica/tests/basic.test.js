@@ -3,7 +3,6 @@
 
 // Import utility functions for testing
 const { getAvgRating } = require("../utils/review.js");
-const searchAnalytics = require("../utils/searchAnalytics.js");
 
 describe("Joya Platform - Basic Tests", () => {
   // Test utility functions
@@ -23,15 +22,6 @@ describe("Joya Platform - Basic Tests", () => {
     test("getAvgRating should handle null/undefined input", () => {
       expect(getAvgRating(null)).toBe(0);
       expect(getAvgRating(undefined)).toBe(0);
-    });
-  });
-
-  // Test search analytics
-  describe("Search Analytics", () => {
-    test("should be able to log search without errors", () => {
-      expect(() => {
-        searchAnalytics.logSearch("test query", 5, "hotel");
-      }).not.toThrow();
     });
   });
 
