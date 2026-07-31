@@ -8,6 +8,10 @@ import VerifyEmailPage from "./pages/VerifyEmailPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import UpdatePasswordPage from "./pages/UpdatePasswordPage";
 import ChangeEmailPage from "./pages/ChangeEmailPage";
+import NewBookingPage from "./pages/NewBookingPage";
+import BookingDetailPage from "./pages/BookingDetailPage";
+import PaymentSuccessPage from "./pages/PaymentSuccessPage";
+import PaymentCancelPage from "./pages/PaymentCancelPage";
 
 function App() {
   return (
@@ -16,6 +20,10 @@ function App() {
         <Route index element={<Navigate to="/listings" replace />} />
         <Route path="/listings" element={<ListingsPage />} />
         <Route path="/listings/:id" element={<ListingDetailPage />} />
+        <Route path="/listings/:id/bookings/new" element={<NewBookingPage />} />
+        <Route path="/listings/:id/bookings/:bookingId" element={<BookingDetailPage />} />
+        <Route path="/payments/success" element={<PaymentSuccessPage />} />
+        <Route path="/payments/cancel" element={<PaymentCancelPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/verify-email" element={<VerifyEmailPage />} />

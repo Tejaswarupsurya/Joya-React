@@ -11,35 +11,48 @@ module.exports.createCheckoutSession = async (req, res) => {
   try {
     // Validate input
     if (!checkIn || !checkOut || !guests || !listingId) {
-      return res.status(400).json({ error: "Missing required fields" });
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields",
+      });
     }
 
     // Validate guests
     if (guests < 1 || guests > 6) {
-      return res.status(400).json({ error: "Guests must be between 1 and 6" });
+      return res.status(400).json({
+        success: false,
+        message: "Guests must be between 1 and 6",
+      });
     }
 
     // Get listing details
     const listing = await Listing.findById(listingId);
     if (!listing) {
-      return res.status(404).json({ error: "Listing not found" });
+      return res.status(404).json({
+        success: false,
+        message: "Listing not found",
+      });
     }
 
     // Calculate nights and validate dates
     const checkInDate = new Date(checkIn);
     const checkOutDate = new Date(checkOut);
     const nights = Math.ceil(
-      (checkOutDate - checkInDate) / (1000 * 60 * 60 * 24)
+      (checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24)
     );
 
     if (nights < 1) {
-      return res
-        .status(400)
-        .json({ error: "Check-out must be after check-in" });
+      return res.status(400).json({
+        success: false,
+        message: "Check-out must be after check-in",
+      });
     }
 
     if (nights > 14) {
-      return res.status(400).json({ error: "Maximum stay is 14 nights" });
+      return res.status(400).json({
+        success: false,
+        message: "Maximum stay is 14 nights",
+      });
     }
 
     // Calculate total price (SINGLE SOURCE OF TRUTH)
@@ -57,9 +70,10 @@ module.exports.createCheckoutSession = async (req, res) => {
     });
 
     if (existing.length > 0) {
-      return res
-        .status(400)
-        .json({ error: "Selected dates are not available" });
+      return res.status(400).json({
+        success: false,
+        message: "Selected dates are not available",
+      });
     }
 
     // Create booking with PENDING_PAYMENT status
@@ -74,7 +88,9 @@ module.exports.createCheckoutSession = async (req, res) => {
     });
 
     await booking.save();
-    console.log(`📝 Booking created: ${booking._id} (status: pending_payment)`);
+
+    const clientUrl =
+      process.env.CLIENT_URL || process.env.FRONTEND_URL || "http://localhost:5173";
 
     // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
@@ -101,22 +117,23 @@ module.exports.createCheckoutSession = async (req, res) => {
         userId: req.user._id.toString(),
         listingId: listingId,
       },
-      success_url: `${process.env.BASE_URL}/payments/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.BASE_URL}/payments/cancel?booking_id=${booking._id}`,
+      success_url: `${clientUrl}/payments/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${clientUrl}/payments/cancel?booking_id=${booking._id}`,
     });
 
     // Save session ID to booking
     booking.stripeSessionId = session.id;
     await booking.save();
 
-    console.log(
-      `💳 Stripe session created: ${session.id} for booking: ${booking._id}`
-    );
-
-    res.json({ sessionUrl: session.url });
+    return res.status(200).json({
+      success: true,
+      sessionUrl: session.url,
+    });
   } catch (error) {
-    console.error("Error creating checkout session:", error);
-    res.status(500).json({ error: "Failed to create checkout session" });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to create checkout session",
+    });
   }
 };
 
@@ -133,8 +150,10 @@ module.exports.stripeWebhook = async (req, res) => {
       process.env.STRIPE_WEBHOOK_SECRET
     );
   } catch (err) {
-    console.error("⚠️ Webhook signature verification failed:", err.message);
-    return res.status(400).send(`Webhook Error: ${err.message}`);
+    return res.status(400).json({
+      success: false,
+      message: `Webhook Error: ${err.message}`,
+    });
   }
 
   // Handle the event
@@ -148,14 +167,15 @@ module.exports.stripeWebhook = async (req, res) => {
       });
 
       if (!booking) {
-        console.error("❌ Booking not found for session:", session.id);
-        return res.status(404).json({ error: "Booking not found" });
+        return res.status(404).json({
+          success: false,
+          message: "Booking not found",
+        });
       }
 
       // Check if already confirmed (idempotency)
       if (booking.status === "confirmed") {
-        console.log(`✅ Booking ${booking._id} already confirmed, skipping`);
-        return res.json({ received: true });
+        return res.status(200).json({ received: true });
       }
 
       // Confirm the booking
@@ -163,11 +183,6 @@ module.exports.stripeWebhook = async (req, res) => {
       booking.stripePaymentIntentId = session.payment_intent;
       booking.expiresAt = null; // Remove expiration
       await booking.save();
-
-      console.log(
-        `✅ Payment confirmed! Booking ${booking._id} status: CONFIRMED`
-      );
-      console.log(`💰 Payment Intent: ${session.payment_intent}`);
 
       // Send booking confirmation email
       try {
@@ -181,25 +196,31 @@ module.exports.stripeWebhook = async (req, res) => {
             booking,
             listing
           );
-          console.log(`📧 Booking confirmation email sent to ${user.email}`);
         }
       } catch (emailError) {
         console.error("Failed to send booking confirmation email:", emailError);
-        // Don't fail the webhook if email fails
       }
     } catch (error) {
-      console.error("Error processing webhook:", error);
-      return res.status(500).json({ error: "Webhook processing failed" });
+      return res.status(500).json({
+        success: false,
+        message: "Webhook processing failed",
+      });
     }
   }
 
-  // Return a response to acknowledge receipt of the event
-  res.json({ received: true });
+  return res.status(200).json({ received: true });
 };
 
-// Success Page (UX Only - No Booking Confirmation)
+// Payment Success Endpoint
 module.exports.paymentSuccess = async (req, res) => {
   const { session_id } = req.query;
+
+  if (!session_id) {
+    return res.status(400).json({
+      success: false,
+      message: "Session ID is required",
+    });
+  }
 
   try {
     // Retrieve session from Stripe
@@ -211,40 +232,85 @@ module.exports.paymentSuccess = async (req, res) => {
     }).populate("listing");
 
     if (!booking) {
-      req.flash("error", "Booking not found");
-      return res.redirect("/dashboard");
+      return res.status(404).json({
+        success: false,
+        message: "Booking not found!",
+      });
     }
 
-    res.render("payments/success", { booking, session });
+    // Confirm booking status if paid & send confirmation email
+    if (session.payment_status === "paid" && booking.status !== "confirmed") {
+      booking.status = "confirmed";
+      booking.stripePaymentIntentId = session.payment_intent;
+      booking.expiresAt = null;
+      await booking.save();
+
+      try {
+        const user = await User.findById(booking.user);
+        if (user && booking.listing) {
+          await sendBookingConfirmedEmail(
+            user.email,
+            user.username,
+            booking,
+            booking.listing
+          );
+          console.log(`📧 Booking confirmation email sent to ${user.email}`);
+        }
+      } catch (emailError) {
+        console.error("Failed to send booking confirmation email:", emailError);
+      }
+    }
+
+    return res.status(200).json({
+      success: true,
+      booking,
+      session: {
+        id: session.id,
+        payment_status: session.payment_status,
+        amount_total: session.amount_total,
+      },
+    });
   } catch (error) {
-    console.error("Error retrieving payment session:", error);
-    req.flash("error", "Failed to retrieve payment details");
-    res.redirect("/dashboard");
+    return res.status(500).json({
+      success: false,
+      message: "Failed to retrieve payment details",
+    });
   }
 };
 
-// Cancel Page (UX Only)
+// Payment Cancel Endpoint
 module.exports.paymentCancel = async (req, res) => {
   const { booking_id } = req.query;
+
+  if (!booking_id) {
+    return res.status(400).json({
+      success: false,
+      message: "Booking ID is required",
+    });
+  }
 
   try {
     const booking = await Booking.findById(booking_id).populate("listing");
 
     if (!booking) {
-      req.flash("error", "Booking not found");
-      return res.redirect("/listings");
+      return res.status(404).json({
+        success: false,
+        message: "Booking not found!",
+      });
     }
 
     // Cancel the booking
     booking.status = "cancelled";
     await booking.save();
 
-    console.log(`❌ Booking ${booking._id} cancelled by user`);
-
-    res.render("payments/cancel", { booking });
+    return res.status(200).json({
+      success: true,
+      booking,
+    });
   } catch (error) {
-    console.error("Error cancelling booking:", error);
-    req.flash("error", "Failed to cancel booking");
-    res.redirect("/dashboard");
+    return res.status(500).json({
+      success: false,
+      message: "Failed to cancel booking",
+    });
   }
 };

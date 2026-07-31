@@ -7,12 +7,7 @@ const mapToken = process.env.MAP_TOKEN;
 const geocodingClient = mbxGeocoding({ accessToken: mapToken });
 
 //utils section
-const {
-  categoryList,
-  categoryIcons,
-  facilitiesList,
-  facilityIcons,
-} = require("../utils/constants.js");
+
 const { getAvgRating, getStarBreakdown } = require("../utils/review.js");
 const { expandQuery } = require("../utils/searchSynonyms.js");
 
@@ -225,16 +220,9 @@ module.exports.showListings = async (req, res) => {
     });
   }
 
-  const avgRating = getAvgRating(listing.reviews);
-  const starBreakdown = getStarBreakdown(listing.reviews);
-
   return res.status(200).json({
     success: true,
     listing,
-    categoryIcons,
-    facilityIcons,
-    avgRating,
-    starBreakdown,
   });
 };
 
@@ -271,8 +259,8 @@ module.exports.renderEditForm = async (req, res) => {
   res.render("./listings/edit.ejs", {
     listing,
     originalImageUrl,
-    categoryList,
-    facilitiesList,
+    // categoryList,
+    // facilitiesList,
   });
 };
 

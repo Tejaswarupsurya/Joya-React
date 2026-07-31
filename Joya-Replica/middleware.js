@@ -115,17 +115,23 @@ module.exports.checkBookingOwnership = async (req, res, next) => {
       "user"
     );
     if (!booking) {
-      req.flash("error", "Booking not found!");
-      return res.redirect("/listings");
+      return res.status(404).json({
+        success: false,
+        message: "Booking not found!",
+      });
     }
     if (!booking.user._id.equals(req.user._id) && req.user.role !== "admin") {
-      req.flash("error", "You don't have permission to access this booking!");
-      return res.redirect("/listings");
+      return res.status(403).json({
+        success: false,
+        message: "You don't have permission to access this booking!",
+      });
     }
     next();
   } catch (err) {
-    req.flash("error", "Something went wrong!");
-    return res.redirect("/listings");
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong!",
+    });
   }
 };
 
@@ -290,10 +296,13 @@ module.exports.isReviewAuthor = async (req, res, next) => {
       message: "Review not found!",
     });
   }
-  if (
-    !review.author.equals(res.locals.currUser._id) &&
-    res.locals.currUser.role !== "admin"
-  ) {
+
+  let listing = await Listing.findById(id);
+  const isAuthor = review.author.equals(res.locals.currUser._id);
+  const isAdmin = res.locals.currUser.role === "admin";
+  const isHostOwner = listing && listing.owner.equals(res.locals.currUser._id);
+
+  if (!isAuthor && !isAdmin && !isHostOwner) {
     return res.status(403).json({
       success: false,
       message: "You aren't the Author of this Review!",

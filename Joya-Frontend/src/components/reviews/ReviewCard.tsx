@@ -8,12 +8,14 @@ import "./ReviewCard.css";
 
 type ReviewCardProps = {
   listingId: string;
+  listingOwnerId?: string;
   review: Review;
   currentUser?: CurrentUser | null;
 };
 
 export default function ReviewCard({
   listingId,
+  listingOwnerId,
   review,
   currentUser,
 }: ReviewCardProps) {
@@ -34,9 +36,11 @@ export default function ReviewCard({
     },
   });
 
-  const isReviewAuthor =
+  const canDeleteReview =
     currentUser &&
-    (review.author?._id === currentUser._id || currentUser.role === "admin");
+    (review.author?._id === currentUser._id ||
+      currentUser.role === "admin" ||
+      (listingOwnerId && currentUser._id === listingOwnerId));
 
   return (
     <div
@@ -68,7 +72,7 @@ export default function ReviewCard({
         />
         <p className="card-text mb-2">{review.comment}</p>
 
-        {isReviewAuthor && (
+        {canDeleteReview && (
           <button
             type="button"
             className="btn btn-sm btn-dark mb-3"

@@ -1,4 +1,4 @@
-import type { Review, StarBreakdown } from "./review";
+import type { Review } from "./review";
 
 export type ListingOwner = {
   _id: string;
@@ -33,9 +33,4 @@ export type Listing = {
 export type ListingDetailResponse = {
   success: boolean;
   listing: Listing;
-  categoryIcons?: Record<string, string>;
-  facilityIcons?: Record<string, string>;
-  avgRating: number;
-  starBreakdown: StarBreakdown;
-  mapToken?: string;
 };

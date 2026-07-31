@@ -10,6 +10,7 @@ import ListingDetailSkeleton from "../components/listings/ListingDetailSkeleton"
 import ReviewForm from "../components/reviews/ReviewForm";
 import ReviewSummary from "../components/reviews/ReviewSummary";
 import ReviewCard from "../components/reviews/ReviewCard";
+import { getAvgRating, getStarBreakdown } from "../utils/review";
 import { categories } from "../constants/categories";
 import { facilities } from "../constants/facilities";
 import "./ListingDetailPage.css";
@@ -87,11 +88,9 @@ export default function ListingDetailPage() {
     );
   }
 
-  const {
-    listing,
-    avgRating = 0,
-    starBreakdown = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
-  } = listingQuery.data;
+  const { listing } = listingQuery.data;
+  const avgRating = getAvgRating(listing.reviews);
+  const starBreakdown = getStarBreakdown(listing.reviews);
 
   const isOwnerOrAdmin =
     currentUser &&
@@ -225,6 +224,7 @@ export default function ListingDetailPage() {
                   <ReviewCard
                     key={review._id}
                     listingId={id!}
+                    listingOwnerId={listing.owner?._id}
                     review={review}
                     currentUser={currentUser}
                   />

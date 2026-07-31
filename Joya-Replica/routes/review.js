@@ -18,8 +18,8 @@ const wrapAsync = require("../utils/wrapAsync.js");
 
 
 //Review routes
-router.post("/",isLoggedIn, validateReview, isAlreadyReviewed, wrapAsync(reviewController.createReview));
+router.post("/", isLoggedIn, validateReview, isAlreadyReviewed, wrapAsync(reviewController.createReview));
 
-router.delete("/:reviewId",isLoggedIn, isHostOrAdmin, isReviewAuthor, wrapAsync(reviewController.destroyReview));
+router.delete("/:reviewId", isLoggedIn, isReviewAuthor, wrapAsync(reviewController.destroyReview));
 
 module.exports = router;

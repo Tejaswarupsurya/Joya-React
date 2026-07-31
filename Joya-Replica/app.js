@@ -150,9 +150,11 @@ app.use("/api/listings", listingRouter);
 app.use("/api/auth", authApiRouter);
 app.use("/api/listings/:id/reviews", reviewRouter);
 app.use("/listings/:id/reviews", reviewRouter);
+app.use("/api/listings/:id/bookings", bookingRouter);
 app.use("/listings/:id/bookings", bookingRouter);
 app.use("/api/wishlist", wishlistRouter);
 app.use("/info/:page", infoRouter);
+app.use("/api/payments", paymentRouter);
 app.use("/payments", paymentRouter);
 app.use("/", adminRouter);
 app.use("/", hostRouter);
@@ -169,14 +171,10 @@ app.use((err, req, res, next) => {
 
   const { statusCode = 500, message = "Something went wrong" } = err;
 
-  if (req.originalUrl.startsWith("/api/")) {
-    return res.status(statusCode).json({
-      success: false,
-      message,
-    });
-  }
-
-  res.status(statusCode).render("error.ejs", { message });
+  return res.status(statusCode).json({
+    success: false,
+    message,
+  });
 });
 
 // Export app for testing
