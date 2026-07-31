@@ -18,6 +18,12 @@ type ListingsParams = {
   sortBy?: string;
 };
 
+export type EditListingResponse = {
+  success: boolean;
+  listing: Listing;
+  originalImageUrl?: string;
+};
+
 export const getListings = async (
   params: ListingsParams,
 ): Promise<ListingsResponse> => {
@@ -35,6 +41,29 @@ export const getListingById = async (
   id: string,
 ): Promise<ListingDetailResponse> => {
   const response = await api.get<ListingDetailResponse>(`/listings/${id}`);
+  return response.data;
+};
+
+export const getEditListing = async (
+  id: string,
+): Promise<EditListingResponse> => {
+  const response = await api.get<EditListingResponse>(`/listings/${id}/edit`);
+  return response.data;
+};
+
+export const updateListing = async (
+  id: string,
+  formData: FormData,
+): Promise<{ success: boolean; message: string; listing: Listing }> => {
+  const response = await api.put<{
+    success: boolean;
+    message: string;
+    listing: Listing;
+  }>(`/listings/${id}`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
   return response.data;
 };
 

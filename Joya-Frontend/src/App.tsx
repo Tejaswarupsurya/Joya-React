@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import MainLayout from "./layouts/MainLayout";
 import ListingsPage from "./pages/ListingsPage";
 import ListingDetailPage from "./pages/ListingDetailPage";
+import EditListingPage from "./pages/EditListingPage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import VerifyEmailPage from "./pages/VerifyEmailPage";
@@ -20,6 +21,7 @@ function App() {
         <Route index element={<Navigate to="/listings" replace />} />
         <Route path="/listings" element={<ListingsPage />} />
         <Route path="/listings/:id" element={<ListingDetailPage />} />
+        <Route path="/listings/:id/edit" element={<EditListingPage />} />
         <Route path="/listings/:id/bookings/new" element={<NewBookingPage />} />
         <Route path="/listings/:id/bookings/:bookingId" element={<BookingDetailPage />} />
         <Route path="/payments/success" element={<PaymentSuccessPage />} />
