@@ -165,6 +165,8 @@ app.use((err, req, res, next) => {
     return next(err);
   }
 
+  console.error("❌ Express Error Handler Caught:", err);
+
   const { statusCode = 500, message = "Something went wrong" } = err;
 
   return res.status(statusCode).json({
