@@ -254,7 +254,6 @@ module.exports.paymentSuccess = async (req, res) => {
             booking,
             booking.listing
           );
-          console.log(`📧 Booking confirmation email sent to ${user.email}`);
         }
       } catch (emailError) {
         console.error("Failed to send booking confirmation email:", emailError);

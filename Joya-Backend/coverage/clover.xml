@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1785539266537" clover="3.2.0">
-  <project timestamp="1785539266537" name="All files">
+<coverage generated="1785580447126" clover="3.2.0">
+  <project timestamp="1785580447126" name="All files">
     <metrics statements="38" coveredstatements="23" conditionals="10" coveredconditionals="4" methods="5" coveredmethods="3" elements="53" coveredelements="30" complexity="0" loc="38" ncloc="38" packages="2" files="4" classes="4"/>
-    <package name="Joya-Replica">
+    <package name="Joya-Backend">
       <metrics statements="18" coveredstatements="9" conditionals="2" coveredconditionals="0" methods="1" coveredmethods="0"/>
-      <file name="schema.js" path="C:\Users\tejas\Desktop\Joya-React\Joya-Replica\schema.js">
+      <file name="schema.js" path="C:\Users\tejas\Desktop\Joya-React\Joya-Backend\schema.js">
         <metrics statements="18" coveredstatements="9" conditionals="2" coveredconditionals="0" methods="1" coveredmethods="0"/>
         <line num="1" count="1" type="stmt"/>
         <line num="2" count="1" type="stmt"/>
@@ -26,9 +26,9 @@
         <line num="98" count="1" type="stmt"/>
       </file>
     </package>
-    <package name="Joya-Replica.utils">
+    <package name="Joya-Backend.utils">
       <metrics statements="20" coveredstatements="14" conditionals="8" coveredconditionals="4" methods="4" coveredmethods="3"/>
-      <file name="ExpressError.js" path="C:\Users\tejas\Desktop\Joya-React\Joya-Replica\utils\ExpressError.js">
+      <file name="ExpressError.js" path="C:\Users\tejas\Desktop\Joya-React\Joya-Backend\utils\ExpressError.js">
         <metrics statements="5" coveredstatements="5" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
         <line num="3" count="1" type="stmt"/>
         <line num="4" count="1" type="stmt"/>
@@ -36,7 +36,7 @@
         <line num="6" count="1" type="stmt"/>
         <line num="9" count="1" type="stmt"/>
       </file>
-      <file name="constants.js" path="C:\Users\tejas\Desktop\Joya-React\Joya-Replica\utils\constants.js">
+      <file name="constants.js" path="C:\Users\tejas\Desktop\Joya-React\Joya-Backend\utils\constants.js">
         <metrics statements="5" coveredstatements="5" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
         <line num="1" count="1" type="stmt"/>
         <line num="17" count="1" type="stmt"/>
@@ -44,7 +44,7 @@
         <line num="47" count="1" type="stmt"/>
         <line num="61" count="1" type="stmt"/>
       </file>
-      <file name="review.js" path="C:\Users\tejas\Desktop\Joya-React\Joya-Replica\utils\review.js">
+      <file name="review.js" path="C:\Users\tejas\Desktop\Joya-React\Joya-Backend\utils\review.js">
         <metrics statements="10" coveredstatements="4" conditionals="8" coveredconditionals="4" methods="3" coveredmethods="2"/>
         <line num="2" count="4" type="cond" truecount="4" falsecount="0"/>
         <line num="3" count="3" type="stmt"/>

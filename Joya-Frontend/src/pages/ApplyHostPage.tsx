@@ -1,4 +1,4 @@
-import { useState, useRef, DragEvent, ChangeEvent } from "react";
+import { useState, useRef, type DragEvent, type ChangeEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";

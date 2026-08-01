@@ -5,6 +5,10 @@ on:
     branches: ["main"]
   pull_request:
 
+defaults:
+  run:
+    working-directory: ./Joya-Backend
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -14,14 +18,15 @@ jobs:
         node-version: ["18.x"]
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: npm
+          cache: "npm"
+          cache-dependency-path: Joya-Backend/package-lock.json
 
       - name: Install dependencies
         run: npm ci
@@ -31,5 +36,5 @@ jobs:
           NODE_ENV: test
         run: npm test
 
-      - name: Build Docker image
-        run: docker build -t joya-app:ci .
+      - name: Build Docker image (validation)
+        run: docker build -t joya-app:ci -f Dockerfile .

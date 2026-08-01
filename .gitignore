@@ -1,0 +1,34 @@
+# ─── OS / Editor ─────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ─── Logs ────────────────────────────────────────────────────────────────────
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ─── Environment secrets (never commit these) ─────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ─── Dependencies ─────────────────────────────────────────────────────────────
+node_modules/
+
+# ─── Frontend build output ────────────────────────────────────────────────────
+Joya-Frontend/dist/
+Joya-Frontend/dist-ssr/
+Joya-Frontend/coverage/
+
+# ─── Backend build/test artifacts ────────────────────────────────────────────
+Joya-Backend/coverage/

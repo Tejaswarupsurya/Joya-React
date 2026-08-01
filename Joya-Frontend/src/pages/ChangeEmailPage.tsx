@@ -31,17 +31,17 @@ export default function ChangeEmailPage() {
   const changeEmailMutation = useMutation({
     mutationFn: changeEmail,
     onSuccess: (data) => {
-      if (data.user) {
-        queryClient.setQueryData<AuthResponse>(["auth"], (old) =>
-          old
-            ? {
-                ...old,
-                currentUser: { ...old.currentUser!, email: data.user.email },
-              }
-            : { currentUser: data.user, userWishlist: [] },
-        );
+        const newEmail = data.user?.email;
+        if (newEmail) {
+          queryClient.setQueryData<AuthResponse>(["auth"], (old) => {
+            if (!old || !old.currentUser) return old;
+            return {
+              ...old,
+              currentUser: { ...old.currentUser, email: newEmail },
+            };
+          });
+        }
         queryClient.invalidateQueries({ queryKey: ["auth"] });
-      }
       toast.success(data.message || "Email updated successfully!");
       navigate("/listings");
     },

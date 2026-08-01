@@ -4,6 +4,10 @@ on:
   push:
     branches: ["main"]
 
+defaults:
+  run:
+    working-directory: ./Joya-Backend
+
 jobs:
   deploy:
     runs-on: [self-hosted, linux, x64]
@@ -19,7 +23,7 @@ jobs:
           echo "Runner arch: $RUNNER_ARCH"
 
       - name: Build Docker image
-        run: docker build -t joya-app:latest .
+        run: docker build -t joya-app:latest -f Dockerfile .
 
       - name: Stop old container (if exists)
         run: |
@@ -32,4 +36,5 @@ jobs:
             --name joya-app \
             -p 127.0.0.1:3000:3000 \
             --env-file /home/ubuntu/.env \
+            --restart unless-stopped \
             joya-app:latest
