@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { toast } from "sonner";
 
-import { getBookingById, cancelBooking } from "../api/bookings";
+import { getBookingById, cancelBooking, resumeCheckoutSession } from "../api/bookings";
 import ListingMap from "../components/listings/ListingMap";
 import BookingDetailSkeleton from "../components/bookings/BookingDetailSkeleton";
 import "./BookingDetailPage.css";
@@ -33,10 +33,32 @@ export default function BookingDetailPage() {
     },
   });
 
+  const resumeMutation = useMutation({
+    mutationFn: () => resumeCheckoutSession(bookingId!),
+    onSuccess: (data) => {
+      if (data.sessionUrl) {
+        window.location.href = data.sessionUrl;
+      } else {
+        toast.error("Failed to retrieve payment link.");
+      }
+    },
+    onError: (err) => {
+      if (err instanceof AxiosError && err.response?.data?.message) {
+        toast.error(err.response.data.message);
+      } else {
+        toast.error("Failed to initiate payment.");
+      }
+    },
+  });
+
   const handleCancel = () => {
     if (window.confirm("Are you sure you want to cancel this booking?")) {
       cancelMutation.mutate();
     }
+  };
+
+  const handlePayNow = () => {
+    resumeMutation.mutate();
   };
 
   if (bookingQuery.isLoading) {
@@ -121,11 +143,23 @@ export default function BookingDetailPage() {
         </div>
 
         {/* Buttons */}
-        <div className="d-flex justify-content-between align-items-center mt-3 mb-2">
+        <div className="d-flex justify-content-between align-items-center mt-3 mb-2 gap-2">
+          {booking.status === "pending_payment" && (
+            <button
+              type="button"
+              className="btn btn-warning flex-grow-1"
+              onClick={handlePayNow}
+              disabled={resumeMutation.isPending}
+            >
+              <i className="bi bi-credit-card-fill me-2" />
+              {resumeMutation.isPending ? "Redirecting..." : "Pay Now (Complete Payment)"}
+            </button>
+          )}
+
           {booking.status !== "cancelled" && booking.status !== "expired" && (
             <button
               type="button"
-              className="btn btn-dark"
+              className="btn btn-outline-danger"
               onClick={handleCancel}
               disabled={cancelMutation.isPending}
             >

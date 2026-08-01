@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { useAuth } from "../hooks/useAuth";
 import { getUserDashboard } from "../api/user";
 import { toggleWishlist } from "../api/wishlist";
+import { resumeCheckoutSession } from "../api/bookings";
 import "./UserDashboardPage.css";
 
 function PendingCountdown({ expiresAt }: { expiresAt: string }) {
@@ -122,6 +123,24 @@ export default function UserDashboardPage() {
     },
     onError: () => {
       toast.error("Failed to update wishlist.");
+    },
+  });
+
+  const resumeCheckoutMutation = useMutation({
+    mutationFn: (bookingId: string) => resumeCheckoutSession(bookingId),
+    onSuccess: (data) => {
+      if (data.sessionUrl) {
+        window.location.href = data.sessionUrl;
+      } else {
+        toast.error("Failed to retrieve payment link.");
+      }
+    },
+    onError: (err) => {
+      if (err instanceof AxiosError && err.response?.data?.message) {
+        toast.error(err.response.data.message);
+      } else {
+        toast.error("Failed to initiate payment.");
+      }
     },
   });
 
@@ -541,19 +560,26 @@ export default function UserDashboardPage() {
                           Booking Expired
                         </button>
                       ) : (
-                        <Link
-                          to={`/listings/${booking.listing?._id}/bookings/${booking._id}`}
-                          className={`btn w-100 text-decoration-none ${
-                            isExpiringSoon
-                              ? "btn-warning"
-                              : "btn-pending-action"
-                          }`}
-                        >
-                          <i className="bi bi-hand-thumbs-up me-2" />
-                          {isExpiringSoon
-                            ? "Waiting for confirmation (Urgent!)"
-                            : "Waiting for confirmation"}
-                        </Link>
+                        <div className="d-flex flex-column gap-2">
+                          <button
+                            type="button"
+                            className="btn btn-warning w-100"
+                            onClick={() => resumeCheckoutMutation.mutate(booking._id)}
+                            disabled={resumeCheckoutMutation.isPending}
+                          >
+                            <i className="bi bi-credit-card-fill me-2" />
+                            {resumeCheckoutMutation.isPending
+                              ? "Redirecting..."
+                              : "Pay Now (Complete Payment)"}
+                          </button>
+                          <Link
+                            to={`/listings/${booking.listing?._id}/bookings/${booking._id}`}
+                            className="btn btn-outline-secondary btn-sm w-100 text-decoration-none"
+                          >
+                            <i className="bi bi-eye me-2" />
+                            View Details
+                          </Link>
+                        </div>
                       )}
                     </div>
                   </div>

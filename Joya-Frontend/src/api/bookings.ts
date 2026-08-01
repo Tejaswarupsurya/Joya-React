@@ -64,3 +64,12 @@ export const getPaymentCancel = async (
   );
   return response.data;
 };
+
+export const resumeCheckoutSession = async (
+  bookingId: string
+): Promise<CheckoutSessionResponse> => {
+  const response = await api.post<CheckoutSessionResponse>(
+    `/payments/resume-checkout/${bookingId}`
+  );
+  return response.data;
+};

@@ -316,3 +316,113 @@ module.exports.paymentCancel = async (req, res) => {
     });
   }
 };
+
+// Resume Checkout Session for Pending Payment Booking
+module.exports.resumeCheckoutSession = async (req, res) => {
+  const { bookingId } = req.params;
+
+  try {
+    const booking = await Booking.findById(bookingId).populate("listing");
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: "Booking not found",
+      });
+    }
+
+    if (!booking.user.equals(req.user._id)) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized access to this booking",
+      });
+    }
+
+    if (booking.status !== "pending_payment") {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot pay for booking with status: ${booking.status}`,
+      });
+    }
+
+    if (booking.isExpired()) {
+      booking.status = "expired";
+      await booking.save();
+      return res.status(400).json({
+        success: false,
+        message: "This booking reservation has expired.",
+      });
+    }
+
+    const clientUrl =
+      process.env.BASE_URL ||
+      process.env.CLIENT_URL ||
+      process.env.FRONTEND_URL ||
+      "http://localhost:5173";
+
+    let sessionUrl = null;
+
+    if (booking.stripeSessionId) {
+      try {
+        const existingSession = await stripe.checkout.sessions.retrieve(
+          booking.stripeSessionId
+        );
+        if (existingSession && existingSession.status === "open") {
+          sessionUrl = existingSession.url;
+        }
+      } catch (err) {
+        // Session expired on Stripe side, will create a fresh one below
+      }
+    }
+
+    if (!sessionUrl) {
+      const listing = booking.listing;
+      const nights = Math.ceil(
+        (new Date(booking.checkOut).getTime() -
+          new Date(booking.checkIn).getTime()) /
+          (1000 * 60 * 60 * 24)
+      );
+
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        mode: "payment",
+        line_items: [
+          {
+            price_data: {
+              currency: "inr",
+              product_data: {
+                name: listing.title,
+                description: `${nights} night${
+                  nights > 1 ? "s" : ""
+                } • ${booking.guests} guest${booking.guests > 1 ? "s" : ""}`,
+                images: listing.image?.url ? [listing.image.url] : [],
+              },
+              unit_amount: Math.round(booking.totalPrice * 100),
+            },
+            quantity: 1,
+          },
+        ],
+        metadata: {
+          bookingId: booking._id.toString(),
+          userId: req.user._id.toString(),
+          listingId: listing._id.toString(),
+        },
+        success_url: `${clientUrl}/payments/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${clientUrl}/payments/cancel?booking_id=${booking._id}`,
+      });
+
+      booking.stripeSessionId = session.id;
+      await booking.save();
+      sessionUrl = session.url;
+    }
+
+    return res.status(200).json({
+      success: true,
+      sessionUrl,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to resume checkout session",
+    });
+  }
+};

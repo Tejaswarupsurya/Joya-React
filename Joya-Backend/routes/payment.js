@@ -21,6 +21,13 @@ router.post(
 // Signature verification requires raw body
 router.post("/webhook", wrapAsync(paymentController.stripeWebhook));
 
+// Resume Checkout Session for Pending Payment
+router.post(
+  "/resume-checkout/:bookingId",
+  isLoggedIn,
+  wrapAsync(paymentController.resumeCheckoutSession)
+);
+
 // Success Page
 router.get("/success", isLoggedIn, wrapAsync(paymentController.paymentSuccess));
 
