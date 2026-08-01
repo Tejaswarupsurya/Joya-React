@@ -5,6 +5,8 @@
 ### 🏨 A Modern Full-Stack Travel Booking Platform
 
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github)](https://github.com/Tejaswarupsurya/Joya-React)
+[![Frontend](https://img.shields.io/badge/🚀_Frontend-Vercel-000000?style=for-the-badge&logo=vercel)](https://joya-pink.vercel.app)
+[![Backend](https://img.shields.io/badge/⚙️_Backend-AWS_EC2_--_HTTPS-FF9900?style=for-the-badge&logo=amazonec2)](https://joya-pink.duckdns.org/api/listings)
 
 [![CI](https://github.com/Tejaswarupsurya/Joya-React/actions/workflows/ci.yml/badge.svg)](https://github.com/Tejaswarupsurya/Joya-React/actions/workflows/ci.yml)
 [![CD](https://github.com/Tejaswarupsurya/Joya-React/actions/workflows/cd.yml/badge.svg)](https://github.com/Tejaswarupsurya/Joya-React/actions/workflows/cd.yml)
@@ -35,6 +37,8 @@
 
 **A production-ready travel accommodation platform rebuilt from EJS to a modern React + TypeScript SPA, featuring a fully decoupled REST API backend, Stripe payments, OTP-based email verification, interactive Mapbox maps, CI/CD with GitHub Actions, and Docker deployment on AWS EC2.**
 
+[🚀 Live App (Vercel)](https://joya-pink.vercel.app) · [⚙️ Live API (EC2 HTTPS)](https://joya-pink.duckdns.org/api/listings) · [📘 Troubleshooting Guide](deployment.md)
+
 </div>
 
 ---
@@ -49,7 +53,7 @@
 - [Getting Started](#-getting-started)
 - [Environment Variables](#-environment-variables)
 - [Project Structure](#-project-structure)
-- [API References](#-api-reference)
+- [API Reference](#-api-reference)
 - [Authentication System](#-authentication-system)
 - [Payment Integration](#-payment-integration)
 - [Email System](#-email-system)
@@ -57,6 +61,7 @@
 - [Testing](#-testing)
 - [CI/CD Pipeline](#-cicd-pipeline)
 - [Deployment](#-deployment)
+- [Troubleshooting & Security Guide](deployment.md)
 - [Contributing](#-contributing)
 - [License](#-license)
 
@@ -950,19 +955,17 @@ The React SPA (`npm run build`) outputs a static `dist/` folder that can be depl
 - [x] Multi-stage Docker build
 - [x] CI pipeline with automated tests
 - [x] CD pipeline with self-hosted runner
-- [x] CORS configured for frontend origin
+- [x] CORS configured for frontend origin (`CORS_ORIGIN` + `*.vercel.app`)
 - [x] Stripe webhook raw-body middleware ordering
 - [x] Frontend TypeScript build passes (`tsc -b && vite build`)
-- [ ] Set `NODE_ENV=production` in container env
-- [ ] Set `BASE_URL` to production frontend URL (for Stripe redirects)
-- [ ] Update `cors` origin in `app.js` to production frontend domain
-- [ ] Configure Stripe **live** keys
-- [ ] Register Stripe webhook endpoint in Stripe dashboard
+- [x] Set `NODE_ENV=production` in container env
+- [x] Set `BASE_URL` to production frontend URL (for Stripe redirects)
+- [x] Deploy frontend build to Vercel CDN
+- [x] Nginx reverse proxy + SSL via Let's Encrypt & DuckDNS (`joya-pink.duckdns.org`)
+- [ ] Configure Stripe **live** keys (currently test mode)
 - [ ] Configure production SMTP credentials
 - [ ] Enable MongoDB Atlas IP whitelist / VPC peering
 - [ ] Set strong `SECRET` and `JWT_SECRET` values
-- [ ] Deploy frontend build to CDN / hosting
-- [ ] (Optional) Nginx reverse proxy + SSL via Let's Encrypt
 
 ---
 
