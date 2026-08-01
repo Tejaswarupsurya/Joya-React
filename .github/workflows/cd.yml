@@ -22,6 +22,9 @@ jobs:
           echo "Runner OS: $RUNNER_OS"
           echo "Runner arch: $RUNNER_ARCH"
 
+      - name: Prune old Docker caches
+        run: docker system prune -f
+
       - name: Build Docker image
         run: docker build -t joya-app:latest -f Dockerfile .
 
@@ -34,7 +37,7 @@ jobs:
         run: |
           docker run -d \
             --name joya-app \
-            -p 127.0.0.1:3000:3000 \
+            -p 3000:3000 \
             --env-file /home/ubuntu/.env \
             --restart unless-stopped \
             joya-app:latest
