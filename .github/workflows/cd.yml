@@ -22,16 +22,16 @@ jobs:
           echo "Runner OS: $RUNNER_OS"
           echo "Runner arch: $RUNNER_ARCH"
 
-      - name: Prune old Docker caches
-        run: docker system prune -f
-
-      - name: Build Docker image
-        run: docker build -t joya-app:latest -f Dockerfile .
-
-      - name: Stop old container (if exists)
+      - name: Stop and remove old container
         run: |
           docker stop joya-app || true
           docker rm joya-app || true
+
+      - name: Aggressive Docker cleanup
+        run: docker system prune -a --volumes -f || true
+
+      - name: Build Docker image
+        run: docker build -t joya-app:latest -f Dockerfile .
 
       - name: Run new container
         run: |
