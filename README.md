@@ -49,7 +49,7 @@
 - [Getting Started](#-getting-started)
 - [Environment Variables](#-environment-variables)
 - [Project Structure](#-project-structure)
-- [API Reference](#-api-reference)
+- [API References](#-api-reference)
 - [Authentication System](#-authentication-system)
 - [Payment Integration](#-payment-integration)
 - [Email System](#-email-system)
