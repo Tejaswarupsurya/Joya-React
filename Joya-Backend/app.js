@@ -21,14 +21,24 @@ if (process.env.NODE_ENV === "production") {
 
 const allowedOrigins = (process.env.CORS_ORIGIN || "http://localhost:5173")
   .split(",")
-  .map((o) => o.trim());
+  .map((o) => o.trim().replace(/\/$/, ""));
 
 app.use(
   cors({
     origin: (origin, callback) => {
       // Allow requests with no origin (e.g. curl, server-to-server)
       if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) return callback(null, true);
+      
+      const cleanOrigin = origin.replace(/\/$/, "");
+
+      // Allow matching origins in CORS_ORIGIN, or any vercel.app deployment preview
+      if (
+        allowedOrigins.includes(cleanOrigin) ||
+        cleanOrigin.endsWith(".vercel.app")
+      ) {
+        return callback(null, true);
+      }
+
       callback(new Error(`CORS: origin '${origin}' not allowed`));
     },
     credentials: true,
