@@ -90,7 +90,10 @@ module.exports.createCheckoutSession = async (req, res) => {
     await booking.save();
 
     const clientUrl =
-      process.env.CLIENT_URL || process.env.FRONTEND_URL || "http://localhost:5173";
+      process.env.BASE_URL ||
+      process.env.CLIENT_URL ||
+      process.env.FRONTEND_URL ||
+      "http://localhost:5173";
 
     // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
